@@ -36,10 +36,4 @@ exp-message는 여러 기술 스택을 활용하여 구축하는 **아주 튼튼
 
 ## 문서
 
-- [아키텍처 설계](./00-docs/architecture.md)
-- [프로젝트 구조](./00-docs/project-structure.md)
-- [패치노트](./00-docs/patch)
-
-## 패치노트
-
-데일리 패치노트는 [00-docs/patch](./00-docs/patch) 디렉토리에서 확인할 수 있습니다.
+데일리 패치노트를 [00-docs/patch](./00-docs/patch) 디렉토리에서 확인할 수 있습니다.
