@@ -1,0 +1,23 @@
+MySQL Error 2003 (HY000): Can't connect to MySQL server on '10.100.229.161:3306' (10060)
+apiVersion: v2
+name: everything
+description: Umbrella chart that includes all services (MySQL, Redis, Application, etc.)
+type: application
+version: 0.1.0
+
+dependencies:
+  - name: mysql
+    version: 0.1.0
+    repository: "file://../mysql"
+    condition: mysql.enabled
+
+# Note: Add more dependencies as services are added:
+#  - name: redis
+#    version: 0.1.0
+#    repository: "file://../redis"
+#    condition: redis.enabled
+#  - name: application
+#    version: 0.1.0
+#    repository: "file://../application"
+#    condition: application.enabled
+

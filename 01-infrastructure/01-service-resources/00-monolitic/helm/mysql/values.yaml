@@ -1,0 +1,73 @@
+# MySQL Image Configuration
+image:
+  repository: mysql
+  tag: "8.0"
+  pullPolicy: IfNotPresent
+
+# MySQL Configuration
+mysql:
+  rootPassword: rootpassword
+  database: message_db
+  user: message_user
+  password: message_password
+  port: 3306
+
+# Binlog Configuration
+binlog:
+  enabled: true
+  format: ROW
+  expireLogsDays: 7
+  maxBinlogSize: 100M
+
+# Performance Settings
+performance:
+  innodbBufferPoolSize: 256M
+  innodbLogFileSize: 64M
+
+# Resource Configuration
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# PersistentVolumeClaim Configuration
+persistence:
+  enabled: true
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  # HostPath for local development (optional)
+  # If set, creates a HostPath PersistentVolume instead of using StorageClass
+  # Example: "/data/mysql" or "/tmp/mysql-data"
+  hostPath: ""
+
+# Service Configuration
+service:
+  type: ClusterIP  # Options: ClusterIP, NodePort, LoadBalancer
+  port: 3306
+  # NodePort configuration (when type is NodePort)
+  nodePort: null  # If null, Kubernetes will assign a random port (30000-32767)
+  # Example: nodePort: 30306
+
+# Health Check Configuration
+healthCheck:
+  liveness:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readiness:
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Deployment Configuration
+replicas: 1
+
+# Namespace
+namespace: default
+
