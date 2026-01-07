@@ -1,0 +1,9 @@
+# Environment variables
+.env
+
+# Docker Compose generated files
+docker-compose/docker-compose.yml
+
+# MySQL directory
+docker-compose/mysql/
+

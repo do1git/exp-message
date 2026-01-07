@@ -10,6 +10,7 @@
 
 각 서비스별로 디렉토리를 구성하여 관리합니다:
 
+- **00-monolitic/**: 모놀리식 서비스 리소스 (MySQL 등)
 - **01-api-gateway/**: API Gateway 서비스 리소스
 - **02-user-service/**: 사용자 서비스 리소스
 - **03-chat-room-service/**: 채팅방 서비스 리소스
