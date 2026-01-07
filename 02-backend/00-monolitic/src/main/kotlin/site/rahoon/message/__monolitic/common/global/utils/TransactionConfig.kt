@@ -1,8 +1,7 @@
-package site.rahoon.message.__monolitic.common.infrastructure
+package site.rahoon.message.__monolitic.common.global.utils
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.lang.Nullable
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource

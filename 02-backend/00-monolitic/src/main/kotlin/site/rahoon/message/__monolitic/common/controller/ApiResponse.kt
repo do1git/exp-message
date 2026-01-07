@@ -1,5 +1,7 @@
 package site.rahoon.message.__monolitic.common.controller
 
+import java.time.ZonedDateTime
+
 /**
  * 공통 API 응답 템플릿
  * success 플래그로 성공/실패를 구분하며, 성공 시 data, 실패 시 error를 포함합니다.
@@ -16,7 +18,7 @@ data class ApiResponse<T>(
         val code: String,
         val message: String,
         val details: Map<String, Any>? = null,
-        val timestamp: String? = null,
+        val occurredAt: ZonedDateTime? = null,
         val path: String? = null
     )
 
@@ -39,13 +41,13 @@ data class ApiResponse<T>(
             code: String,
             message: String,
             details: Map<String, Any>? = null,
-            timestamp: String? = null,
+            occurredAt: ZonedDateTime? = null,
             path: String? = null
         ): ApiResponse<T> {
             return ApiResponse(
                 success = false,
                 data = null,
-                error = ErrorInfo(code, message, details, timestamp, path)
+                error = ErrorInfo(code, message, details, occurredAt, path)
             )
         }
     }

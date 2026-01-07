@@ -1,4 +1,4 @@
-package site.rahoon.message.__monolitic.common.infrastructure
+package site.rahoon.message.__monolitic.common.global.utils
 
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
@@ -59,3 +59,4 @@ class Tx(private val transactionManager: PlatformTransactionManager) {
         return transactionTemplate.execute { action() }!!
     }
 }
+
