@@ -10,8 +10,9 @@ spec:
   accessModes:
     - {{ .Values.persistence.accessMode }}
   {{- if .Values.persistence.hostPath }}
-  # When using hostPath, bind to the specific PV
+  # When using hostPath, bind to the specific PV with matching storageClass
   volumeName: {{ include "mysql.fullname" . }}-pv
+  storageClassName: hostpath
   {{- else if .Values.persistence.storageClass }}
   storageClassName: {{ .Values.persistence.storageClass }}
   {{- end }}

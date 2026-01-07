@@ -36,7 +36,7 @@ resources:
 # PersistentVolumeClaim Configuration
 persistence:
   enabled: true
-  storageClass: ""
+  storageClass: "hostpath"
   accessMode: ReadWriteOnce
   size: 10Gi
   # HostPath for local development (optional)

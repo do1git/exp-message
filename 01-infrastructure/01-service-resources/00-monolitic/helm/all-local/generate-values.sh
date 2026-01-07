@@ -29,6 +29,14 @@ if [ "$IMAGE_REPO" = "$IMAGE_TAG" ]; then
     IMAGE_TAG="latest"
 fi
 
+# Calculate hostPath: absolute path to mysql-data directory inside all-local
+MYSQL_DATA_DIR="$SCRIPT_DIR/mysql-data"
+if [ ! -d "$MYSQL_DATA_DIR" ]; then
+    mkdir -p "$MYSQL_DATA_DIR"
+    echo "Created mysql-data directory at: $MYSQL_DATA_DIR"
+fi
+HOST_PATH="$MYSQL_DATA_DIR"
+
 # Generate values.yaml
 cat > "$OUTPUT_FILE" <<EOF
 # Global settings applied to all subcharts
@@ -75,15 +83,13 @@ mysql:
   
   persistence:
     enabled: true
-    storageClass: ""
+    storageClass: "hostpath"  # Matches PV storageClassName
     accessMode: ReadWriteOnce
     size: 10Gi
-    # HostPath for local development (optional)
-    # Uncomment and set path to mount host directory
-    # hostPath: "/data/mysql"
+    hostPath: "${HOST_PATH}"
   
   service:
-    type: ClusterIP
+    type: ClusterIP  # 기본값: 클러스터 내부 접근만 허용 (안전)
     port: ${MYSQL_PORT}
   
   healthCheck:

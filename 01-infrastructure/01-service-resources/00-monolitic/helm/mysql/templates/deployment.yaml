@@ -15,6 +15,10 @@ spec:
       labels:
         {{- include "mysql.selectorLabels" . | nindent 8 }}
     spec:
+      securityContext:
+        fsGroup: 999 
+        runAsUser: 999
+        runAsGroup: 999
       containers:
       - name: mysql
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -43,6 +47,8 @@ spec:
             secretKeyRef:
               name: {{ include "mysql.fullname" . }}-secret
               key: MYSQL_PASSWORD
+        - name: MYSQL_ALLOW_EMPTY_PASSWORD 
+          value: "yes"
         volumeMounts:
         - name: mysql-data
           mountPath: /var/lib/mysql

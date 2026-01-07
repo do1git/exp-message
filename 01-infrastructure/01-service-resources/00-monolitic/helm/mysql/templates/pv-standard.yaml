@@ -1,0 +1,21 @@
+{{- if and .Values.persistence.enabled (and (not .Values.persistence.hostPath) (eq .Values.persistence.storageClass "standard")) }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "mysql.fullname" . }}-pv-standard
+  labels:
+    {{- include "mysql.labels" . | nindent 4 }}
+spec:
+  capacity:
+    storage: {{ .Values.persistence.size }}
+  accessModes:
+    - {{ .Values.persistence.accessMode }}
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  volumeMode: Filesystem
+  # Note: Standard StorageClass typically uses dynamic provisioning
+  # This PV template is for manual PV creation if needed
+  # For dynamic provisioning, remove this PV and let StorageClass create it automatically
+---
+{{- end }}
+

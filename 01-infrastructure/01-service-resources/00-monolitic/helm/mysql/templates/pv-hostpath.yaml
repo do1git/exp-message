@@ -1,0 +1,21 @@
+{{- if and .Values.persistence.enabled .Values.persistence.hostPath }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "mysql.fullname" . }}-pv
+  labels:
+    {{- include "mysql.labels" . | nindent 4 }}
+spec:
+  capacity:
+    storage: {{ .Values.persistence.size }}
+  accessModes:
+    - {{ .Values.persistence.accessMode }}
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: hostpath
+  volumeMode: Filesystem
+  hostPath:
+    path: {{ .Values.persistence.hostPath }}
+    type: DirectoryOrCreate
+---
+{{- end }}
+

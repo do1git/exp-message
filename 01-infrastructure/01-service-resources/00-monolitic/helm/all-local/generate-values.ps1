@@ -44,6 +44,24 @@ $imageParts = $mysqlImage -split ':'
 $imageRepo = $imageParts[0]
 $imageTag = if ($imageParts.Length -gt 1) { $imageParts[1] } else { "latest" }
 
+# Calculate hostPath: absolute path to mysql-data directory inside all-local
+$mysqlDataDir = Join-Path $ScriptDir "mysql-data"
+if (-not (Test-Path $mysqlDataDir)) {
+    New-Item -ItemType Directory -Path $mysqlDataDir -Force | Out-Null
+    Write-Host "Created mysql-data directory at: $mysqlDataDir" -ForegroundColor Green
+}
+# Convert Windows path to WSL2/Docker Desktop Linux path format
+# C:\Users\... -> /host_mnt/c/Users/... (Docker Desktop format)
+$absolutePath = (Resolve-Path $mysqlDataDir).Path
+if ($absolutePath -match '^([A-Z]):\\(.*)$') {
+    $drive = $matches[1].ToLower()
+    $path = $matches[2] -replace '\\', '/'
+    $hostPath = "/host_mnt/$drive/$path"
+} else {
+    # Fallback: just convert backslashes to forward slashes
+    $hostPath = $absolutePath -replace '\\', '/'
+}
+
 # Generate values.yaml
 $valuesContent = @"
 # Global settings applied to all subcharts
@@ -90,15 +108,13 @@ mysql:
   
   persistence:
     enabled: true
-    storageClass: ""
+    storageClass: "hostpath"  # Matches PV storageClassName
     accessMode: ReadWriteOnce
     size: 10Gi
-    # HostPath for local development (optional)
-    # Uncomment and set path to mount host directory
-    # hostPath: "/data/mysql"
+    hostPath: "$hostPath"
   
   service:
-    type: ClusterIP
+    type: ClusterIP  # 기본값: 클러스터 내부 접근만 허용 (안전)
     port: $($envVars['MYSQL_PORT'])
   
   healthCheck:

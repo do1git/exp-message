@@ -1,6 +1,5 @@
-MySQL Error 2003 (HY000): Can't connect to MySQL server on '10.100.229.161:3306' (10060)
 apiVersion: v2
-name: everything
+name: msg-mono-all-local
 description: Umbrella chart that includes all services (MySQL, Redis, Application, etc.)
 type: application
 version: 0.1.0

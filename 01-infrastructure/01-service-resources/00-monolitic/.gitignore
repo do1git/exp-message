@@ -6,9 +6,3 @@ docker-compose/docker-compose.yml
 
 # MySQL directory
 docker-compose/mysql/
-
-# Helm generated files
-helm/everything/values.yaml
-helm/everything/charts/
-helm/everything/*.tgz
-helm/everything/Chart.lock
