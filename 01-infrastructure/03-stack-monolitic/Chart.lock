@@ -1,0 +1,9 @@
+dependencies:
+- name: mysql
+  repository: file://../01-mysql-mono
+  version: 0.1.0
+- name: app-monolitic
+  repository: file://../02-app-monolitic
+  version: 0.1.0
+digest: sha256:6f8158702ab1e8df45b14c93a748d1d66c3d6a43437e5e38adeea9a6ce618dba
+generated: "2026-01-08T13:33:27.2700583+09:00"

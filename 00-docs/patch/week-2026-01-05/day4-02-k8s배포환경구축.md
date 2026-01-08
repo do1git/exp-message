@@ -106,17 +106,24 @@ kubectl delete deployment hello-world
 1. 레지스트리를 외부에서 접근 가능하도록 설정
    - 방화벽 포트 오픈 (5000)
    - 레지스트리 컨테이너를 외부 IP로 바인딩 (0.0.0.0:5000)
+   => 완료
 
 2. 로컬 개발 환경에서 이미지 빌드
    - Dockerfile로 이미지 빌드
    - 서버 IP로 태그 지정
+   => 완료
 
 3. 레지스트리에 이미지 푸시
    - 로컬에서 서버 레지스트리로 푸시
+   => 완료
 
 4. k3s에서 외부 레지스트리 접근 설정
-   - registries.yaml에 서버 IP 추가
-   - insecure registry 설정
+   - registries.yaml에 서버 IP 추가 (완료)
+   - insecure registry 설정 (따로 설정 x)
 
 5. Helm 차트 배포
    - Helm 차트로 애플리케이션 배포
+   => 완료
+
+6. storage class 없어서 안되는 것 같음..
+=> storage class 없애보자..

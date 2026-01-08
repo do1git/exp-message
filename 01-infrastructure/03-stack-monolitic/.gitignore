@@ -1,0 +1,9 @@
+# Helm dependency charts
+charts/
+
+# Helm package files
+*.tgz
+
+# Temporary files
+.helm/
+
