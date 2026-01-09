@@ -5,7 +5,7 @@ image:
   # - Set pullPolicy to IfNotPresent or Never
   repository: 00-monolitic
   tag: "latest"
-  pullPolicy: IfNotPresent  # IfNotPresent or Never for local images
+  pullPolicy: Always  # IfNotPresent or Never for local images
   
   # For production (image registry):
   # Uncomment and set registry if using image registry:

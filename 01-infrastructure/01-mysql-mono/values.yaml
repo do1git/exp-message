@@ -37,7 +37,7 @@ resources:
 persistence:
   enabled: true
   type: "storageClass"
-  storageClass: "standard"
+  storageClass: ""
   accessMode: ReadWriteOnce
   size: 10Gi
 
