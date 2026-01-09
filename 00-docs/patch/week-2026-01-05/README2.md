@@ -74,10 +74,6 @@
   - docker-compose로 App+MySQL 기동 → curl로 회원가입/로그인/내정보까지 확인
   - k3s+Helm 배포 → Ingress로 동일 시나리오 확인(health 포함) → 실패 로그/이슈를 문서에 남기기
 
-- **API 문서화(= 생산성 + 설득력)**
-  - (종속 해제 시에만) SpringDoc OpenAPI(Swagger UI) 적용/설정 보강
-  - (종속 해제 시에만) Ingress 경로(`/api-docs`, `/swagger-ui`) 노출 및 “시연 URL” 확보
-
 - **프론트엔드(시연용 최소 UI) — ‘붙일 API가 생긴 직후’ 빠르게**
   - 목적은 “제품”이 아니라 **면접/데모용 시연**: 로그인 → 내 정보 → 채팅방 목록 정도의 최소 화면
   - 백엔드 검증을 Swagger/curl만으로 끝내지 않고, **사용자 시나리오를 눈으로 보여줄 수 있게** 만들기
