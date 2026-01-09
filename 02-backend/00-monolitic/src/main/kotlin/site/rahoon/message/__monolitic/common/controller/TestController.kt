@@ -1,5 +1,7 @@
 package site.rahoon.message.__monolitic.common.controller
 
+import jakarta.servlet.http.HttpServletRequest
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,8 +16,10 @@ import site.rahoon.message.__monolitic.common.domain.DomainException
  * 서비스 상태 확인 및 E2E 테스트용 API
  */
 @RestController
-@RequestMapping("/api/health")
-class HealthController {
+@RequestMapping("/test")
+class TestController {
+
+    private val logger = LoggerFactory.getLogger(TestController::class.java)
 
     @GetMapping
     fun health(): ResponseEntity<ApiResponse<Map<String, String>>> {
