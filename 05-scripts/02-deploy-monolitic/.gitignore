@@ -1,0 +1,9 @@
+.env
+kubeconfig.yaml
+values.yaml
+# Helm dependency charts
+charts/
+# Helm package files
+*.tgz
+# Temporary files
+.helm/

@@ -1,0 +1,17 @@
+apiVersion: v2
+name: stack-monolitic
+description: Stack chart for monolithic application with MySQL and Ingress
+type: application
+version: 0.1.0
+appVersion: "0.0.1-SNAPSHOT"
+
+dependencies:
+  - name: mysql
+    version: "0.1.0"
+    repository: "file://../../01-infrastructure/01-mysql-mono"
+    condition: mysql.enabled
+  - name: app-monolitic
+    version: "0.1.0"
+    repository: "file://../../01-infrastructure/02-app-monolitic"
+    condition: app-monolitic.enabled
+

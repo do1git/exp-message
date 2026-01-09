@@ -1,0 +1,56 @@
+# ============================================================================
+# Common Configuration (Reference Only)
+# ============================================================================
+# These values are used across multiple sections. When modifying, ensure
+# consistency across all sections that reference these values.
+#
+# Database Configuration:
+#   - name: message_db
+#   - username: message_user
+#   - password: message_password
+#   - port: 3306
+# ============================================================================
+
+# Global namespace (for Helm chart)
+# namespace: default
+
+# ============================================================================
+# MySQL Configuration (for Helm chart)
+# ============================================================================
+mysql:
+  enabled: true
+  mysql:
+    rootPassword: rootpassword
+    database: message_db      # Common: message_db
+    user: message_user        # Common: message_user
+    password: message_password # Common: message_password
+  persistence:
+    enabled: true
+    size: 10Gi
+
+# ============================================================================
+# Application Configuration (for Helm chart)
+# ============================================================================
+app-monolitic:
+  enabled: true
+  image:
+    registry: "localhost:5000"  # Used by Helm chart and build scripts
+    repository: 00-monolitic
+    tag: "latest"
+  app:
+    name: 00-monolitic
+    port: 8080
+  database:
+    host: ""                    # Empty to use auto-generated name: Release.Name-mysql
+    port: 3306                  # Common: 3306
+    name: message_db             # Common: message_db
+    username: message_user      # Common: message_user
+    password: message_password  # Common: message_password
+    ddlAuto: update
+
+# ============================================================================
+# Ingress Configuration (for Helm chart)
+# ============================================================================
+ingress:
+  enabled: true
+  # host: ""
