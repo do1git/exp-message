@@ -13,7 +13,7 @@ RUN ./gradlew dependencies --no-daemon || true
 COPY src/main ./src/main
 
 # Build the application without tests
-RUN ./gradlew bootJar --no-daemon -x test
+RUN --mount=type=cache,target=/root/.gradle ./gradlew bootJar --no-daemon -x test
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
