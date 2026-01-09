@@ -7,6 +7,33 @@ set -e
 # Script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --action|-a)
+            DEPLOY_ACTION="$2"
+            shift 2
+            ;;
+        --mode|-m)
+            DEPLOY_MODE="$2"
+            shift 2
+            ;;
+        --help|-h)
+            echo "Usage: $0 [OPTIONS]"
+            echo "Options:"
+            echo "  -a, --action ACTION          Deployment action: install, upgrade, delete, or install-or-upgrade"
+            echo "  -m, --mode MODE              Deployment mode: remote or local"
+            echo "  -h, --help                  Show this help message"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Use --help or -h for usage information"
+            exit 1
+            ;;
+    esac
+done
+
 # Load .env file if exists
 if [ -f "$SCRIPT_DIR/.env" ]; then
     echo "Loading environment file: $SCRIPT_DIR/.env"
@@ -22,7 +49,7 @@ elif [ -f "$SCRIPT_DIR/default.env" ]; then
     set +a
 fi
 
-# Default values
+# Default values (command line args override .env, .env overrides defaults)
 REGISTRY_HOST="${REGISTRY_HOST:-localhost}"
 REGISTRY_PORT="${REGISTRY_PORT:-5000}"
 IMAGE_NAME="${IMAGE_NAME:-00-monolitic}"

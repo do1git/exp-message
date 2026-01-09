@@ -6,6 +6,51 @@ setlocal enabledelayedexpansion
 REM Script directory
 set SCRIPT_DIR=%~dp0
 
+REM Parse command line arguments
+:parse_args
+if "%~1"=="" goto end_parse
+if "%~1"=="--action" (
+    set DEPLOY_ACTION=%~2
+    shift
+    shift
+    goto parse_args
+)
+if "%~1"=="-a" (
+    set DEPLOY_ACTION=%~2
+    shift
+    shift
+    goto parse_args
+)
+if "%~1"=="--mode" (
+    set DEPLOY_MODE=%~2
+    shift
+    shift
+    goto parse_args
+)
+if "%~1"=="-m" (
+    set DEPLOY_MODE=%~2
+    shift
+    shift
+    goto parse_args
+)
+if "%~1"=="--help" (
+    goto show_help
+)
+if "%~1"=="-h" (
+    goto show_help
+)
+echo Unknown option: %~1
+echo Use --help or -h for usage information
+exit /b 1
+:show_help
+echo Usage: %~nx0 [OPTIONS]
+echo Options:
+echo   -a, --action ACTION          Deployment action: install, upgrade, delete, or install-or-upgrade
+echo   -m, --mode MODE              Deployment mode: remote or local
+echo   -h, --help                   Show this help message
+exit /b 0
+:end_parse
+
 REM Load .env file if exists
 if exist "%SCRIPT_DIR%.env" (
     echo Loading environment file: %SCRIPT_DIR%.env
@@ -23,7 +68,7 @@ if exist "%SCRIPT_DIR%.env" (
     )
 )
 
-REM Set default values
+REM Set default values (command line args override .env, .env overrides defaults)
 if "%REGISTRY_HOST%"=="" set REGISTRY_HOST=localhost
 if "%REGISTRY_PORT%"=="" set REGISTRY_PORT=5000
 if "%IMAGE_NAME%"=="" set IMAGE_NAME=00-monolitic
@@ -174,7 +219,7 @@ if "%DEPLOY_ACTION%"=="delete" (
             --values "%VALUES_FILE%" ^
             --set app-monolitic.image.registry=%REGISTRY% ^
             --set app-monolitic.image.repository=%IMAGE_REPOSITORY% ^
-            --set app-monolitic.image.tag=%IMAGE_TAG%
+            --set app-monolitic.image.tag=%IMAGE_TAG% ^
     ) else (
         echo    Upgrading existing release...
         helm upgrade %RELEASE_NAME% %CHART_DIR% ^
@@ -183,7 +228,7 @@ if "%DEPLOY_ACTION%"=="delete" (
             --values "%VALUES_FILE%" ^
             --set app-monolitic.image.registry=%REGISTRY% ^
             --set app-monolitic.image.repository=%IMAGE_REPOSITORY% ^
-            --set app-monolitic.image.tag=%IMAGE_TAG%
+            --set app-monolitic.image.tag=%IMAGE_TAG% ^
     )
     
     echo.
@@ -202,7 +247,7 @@ if "%DEPLOY_ACTION%"=="delete" (
             --values "%VALUES_FILE%" ^
             --set app-monolitic.image.registry=%REGISTRY% ^
             --set app-monolitic.image.repository=%IMAGE_REPOSITORY% ^
-            --set app-monolitic.image.tag=%IMAGE_TAG%
+            --set app-monolitic.image.tag=%IMAGE_TAG% ^
     ) else (
         echo    Upgrading existing release...
         helm upgrade %RELEASE_NAME% %CHART_DIR% ^
@@ -210,7 +255,7 @@ if "%DEPLOY_ACTION%"=="delete" (
             --values "%VALUES_FILE%" ^
             --set app-monolitic.image.registry=%REGISTRY% ^
             --set app-monolitic.image.repository=%IMAGE_REPOSITORY% ^
-            --set app-monolitic.image.tag=%IMAGE_TAG%
+            --set app-monolitic.image.tag=%IMAGE_TAG% ^
     )
     
     echo.
