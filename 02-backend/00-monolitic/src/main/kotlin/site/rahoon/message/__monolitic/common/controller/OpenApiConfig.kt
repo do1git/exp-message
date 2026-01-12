@@ -7,7 +7,6 @@ import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
 import org.springdoc.core.customizers.OperationCustomizer
-import org.springdoc.core.utils.SpringDocUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -63,6 +62,34 @@ class OpenApiConfig {
         }
 
         return openAPI
+    }
+
+    /**
+     * 메서드 이름 기반으로 Swagger Operation의 summary를 자동 생성하는 Customizer
+     * 
+     * 현재는 메서드 이름을 기반으로 summary를 생성하지만,
+     * 추후 KDoc 주석의 내용을 읽어서 반영하는 것을 목표로 한다.
+     */
+    @Bean
+    fun methodNameBasedSummaryCustomizer(): OperationCustomizer {
+        return OperationCustomizer { operation, handlerMethod ->
+            val handlerMethodObj = handlerMethod as? HandlerMethod
+            if (handlerMethodObj != null) {
+                val method = handlerMethodObj.method
+                
+                // summary가 비어있으면 메서드 이름 기반으로 생성
+                if (operation.summary.isNullOrBlank()) {
+                    val methodName = method.name
+                    val summary = methodName
+                        .replace(Regex("([A-Z])"), " $1")
+                        .trim()
+                        .lowercase()
+                        .replaceFirstChar { it.uppercase() }
+                    operation.summary = summary
+                }
+            }
+            operation
+        }
     }
 
     /**
