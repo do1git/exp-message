@@ -99,6 +99,11 @@ class ChatRoomApplicationService(
         // 사용자가 참여한 채팅방 멤버 정보 조회
         val memberInfoList = chatRoomMemberApplicationService.getByUserId(userId)
         
+        // 빈 리스트 조기 반환
+        if (memberInfoList.isEmpty()) {
+            return emptyList()
+        }
+        
         // 채팅방 ID 목록 추출
         val chatRoomIds = memberInfoList.map { it.chatRoomId }
         

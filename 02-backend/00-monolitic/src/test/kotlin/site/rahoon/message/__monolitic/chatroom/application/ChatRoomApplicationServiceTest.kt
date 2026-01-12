@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import site.rahoon.message.__monolitic.chatroom.domain.ChatRoomDomainService
@@ -154,8 +155,6 @@ class ChatRoomApplicationServiceTest {
 
         whenever(chatRoomMemberApplicationService.getByUserId(userId))
             .thenReturn(emptyList())
-        whenever(chatRoomDomainService.getByIds(emptyList()))
-            .thenReturn(emptyList())
 
         // when
         val result = chatRoomApplicationService.getByMemberUserId(userId)
@@ -165,7 +164,8 @@ class ChatRoomApplicationServiceTest {
         assertTrue(result.isEmpty())
         
         verify(chatRoomMemberApplicationService).getByUserId(userId)
-        verify(chatRoomDomainService).getByIds(emptyList())
+        // 빈 리스트 조기 반환으로 getByIds는 호출되지 않아야 함
+        verify(chatRoomDomainService, org.mockito.kotlin.never()).getByIds(any())
     }
 
     @Test
