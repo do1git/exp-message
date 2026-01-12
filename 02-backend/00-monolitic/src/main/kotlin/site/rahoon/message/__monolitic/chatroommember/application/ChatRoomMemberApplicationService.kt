@@ -42,4 +42,11 @@ class ChatRoomMemberApplicationService(
     fun getByUserId(userId: String): List<ChatRoomMemberInfo.Detail> {
         return chatRoomMemberDomainService.getByUserId(userId)
     }
+
+    /**
+     * 특정 사용자가 특정 채팅방의 멤버인지 확인합니다.
+     */
+    fun isMember(chatRoomId: String, userId: String): Boolean {
+        return chatRoomMemberDomainService.isMember(chatRoomId, userId)
+    }
 }
