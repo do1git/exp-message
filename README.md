@@ -6,7 +6,7 @@ exp-message는 여러 기술 스택을 활용하여 구축하는 **아주 튼튼
 
 이 프로젝트의 **백엔드**는  안정성, 확장성, 성능을 모두 갖춘 엔터프라이즈급 채팅 서버를 개발하는 것을 목표합니다.
 
-이 프로젝트의 **프론트엔드**는 최소한의 기능만 구현하여 백엔드 서버의 안정성과 성능에 집중합니다. 프론트 개발에 관심 있으시면 편하게 연락 주세요.
+이 프로젝트의 **프론트엔드**는 최소한의 기능만 구현하여 백엔드 서버의 안정성과 성능에 집중합니다. (프론트 개발에 관심 있으시면 편하게 연락 주세요.)
 
 ## 주요 기능
 
@@ -19,5 +19,5 @@ exp-message는 여러 기술 스택을 활용하여 구축하는 **아주 튼튼
 
 ## 문서
 
-- Swagger UI: `https://message.rahoon.site/api/swagger-ui.html`
+- Swagger UI: [message.rahoon.site/api/swagger-ui.html](https://message.rahoon.site/api/swagger-ui.html)
 - 백엔드 개발 노트는 [00-docs/01-patch-rahoon](./00-docs/01-patch-rahoon)에서 확인하실 수 있습니다.
