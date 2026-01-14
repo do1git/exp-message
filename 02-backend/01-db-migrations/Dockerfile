@@ -6,21 +6,31 @@ WORKDIR /app
 COPY build.gradle.kts settings.gradle.kts gradlew ./
 COPY gradle ./gradle
 
+# Fix gradlew permission and line endings (Windows CRLF -> Unix LF)
+RUN chmod +x gradlew && sed -i 's/\r$//' gradlew
+
 # Download dependencies (this layer will be cached if build.gradle.kts doesn't change)
-RUN --mount=type=cache,target=/root/.gradle ./gradlew dependencies --no-daemon || true
+# RUN --mount=type=cache,target=/root/.gradle ./gradlew dependencies --no-daemon || true
+# Windows (without BuildKit): 
+RUN ./gradlew dependencies --no-daemon || true
 
 # Copy Kotlin source code (rarely changes)
 COPY src/main/kotlin ./src/main/kotlin
 COPY src/main/resources/application.properties ./src/main/resources/application.properties
 
 # Build without SQL files first (this layer gets cached)
-RUN --mount=type=cache,target=/root/.gradle ./gradlew compileKotlin --no-daemon
+#RUN --mount=type=cache,target=/root/.gradle ./gradlew compileKotlin --no-daemon
+# Windows (without BuildKit): 
+RUN ./gradlew compileKotlin --no-daemon
 
 # Copy SQL migration files (frequently changes - last layer)
 COPY src/main/resources/db ./src/main/resources/db
 
 # Build the final JAR
-RUN --mount=type=cache,target=/root/.gradle ./gradlew bootJar --no-daemon -x test
+# RUN --mount=type=cache,target=/root/.gradle ./gradlew bootJar --no-daemon -x test
+# Windows (without BuildKit): 
+RUN ./gradlew bootJar --no-daemon -x test
+
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine

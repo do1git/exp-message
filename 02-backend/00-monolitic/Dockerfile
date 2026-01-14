@@ -6,6 +6,9 @@ WORKDIR /app
 COPY build.gradle.kts settings.gradle.kts gradlew ./
 COPY gradle ./gradle
 
+# Fix gradlew permission and line endings (Windows CRLF -> Unix LF)
+RUN chmod +x gradlew && sed -i 's/\r$//' gradlew
+
 # Download dependencies (this layer will be cached if build.gradle.kts doesn't change)
 RUN ./gradlew dependencies --no-daemon || true
 
@@ -13,7 +16,9 @@ RUN ./gradlew dependencies --no-daemon || true
 COPY src/main ./src/main
 
 # Build the application without tests
+# Windows (without BuildKit): 
 RUN --mount=type=cache,target=/root/.gradle ./gradlew bootJar --no-daemon -x test
+#RUN ./gradlew bootJar --no-daemon -x test
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
