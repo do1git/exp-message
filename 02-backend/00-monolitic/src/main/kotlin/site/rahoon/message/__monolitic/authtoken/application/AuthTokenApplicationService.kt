@@ -4,8 +4,10 @@ import org.springframework.stereotype.Service
 import site.rahoon.message.__monolitic.authtoken.domain.AccessToken
 import site.rahoon.message.__monolitic.authtoken.domain.AuthToken
 import site.rahoon.message.__monolitic.authtoken.domain.AuthTokenDomainService
-import site.rahoon.message.__monolitic.loginfailure.domain.LoginFailureTracker
 import site.rahoon.message.__monolitic.common.domain.DomainException
+import site.rahoon.message.__monolitic.common.global.utils.Lock
+import site.rahoon.message.__monolitic.loginfailure.domain.LoginFailureError
+import site.rahoon.message.__monolitic.loginfailure.domain.LoginFailureTracker
 import site.rahoon.message.__monolitic.user.domain.UserDomainService
 
 /**
@@ -41,6 +43,32 @@ class AuthTokenApplicationService(
         loginFailureTracker.checkAndThrowIfLocked(email, ipAddress)
         loginFailureTracker.resetFailureCount(email, ipAddress)
         return authTokenDomainService.issueToken(user.id)
+    }
+    
+    fun loginWithLock( email: String, password: String, ipAddress: String ): AuthToken {
+        // 1. 잠금 상태 확인 (락 획득 전)
+        loginFailureTracker.checkAndThrowIfLocked(email, ipAddress)
+
+        // 2-7. 락 획득 -> 처리 -> 락 해제
+        return Lock.execute(listOf("login:$email", "login:$ipAddress")) { locked, _ ->
+            if(!locked) throw DomainException(LoginFailureError.ACCOUNT_LOCKED, mapOf())
+
+            // 3. 락 획득 후 재확인
+            loginFailureTracker.checkAndThrowIfLocked(email, ipAddress)
+
+            val user = try {
+                // 4. 사용자 조회
+                userDomainService.getUser(email, password)
+            } catch (e: DomainException) {
+                // 5. 실패 시 실패 카운트 증가
+                loginFailureTracker.incrementFailureCount(email, ipAddress)
+                throw e
+            }
+
+            // 6. 성공 시 실패 카운트 초기화
+            loginFailureTracker.resetFailureCount(email, ipAddress)
+            authTokenDomainService.issueToken(user.id)
+        }
     }
 
     // Refresh

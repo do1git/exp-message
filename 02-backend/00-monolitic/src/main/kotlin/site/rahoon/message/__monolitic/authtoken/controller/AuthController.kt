@@ -46,6 +46,24 @@ class AuthController(
         )
     }
 
+    @PostMapping("/login-with-lock")
+    fun loginWithLock(
+        @Valid @RequestBody request: AuthRequest.Login,
+        httpRequest: HttpServletRequest
+    ): ResponseEntity<ApiResponse<AuthResponse.Login>> {
+        val ipAddress = IpAddressUtils.getClientIpAddress(httpRequest)
+        val authToken = authTokenApplicationService.loginWithLock(
+            email = request.email,
+            password = request.password,
+            ipAddress = ipAddress
+        )
+        val response = AuthResponse.Login.from(authToken)
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+            ApiResponse.success(response)
+        )
+    }
+
     /**
      * 토큰 갱신
      * POST /auth/refresh
