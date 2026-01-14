@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "batch-db-migration.fullname" . }}-{{ now | date "20060102-150405" }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "batch-db-migration.labels" . | nindent 4 }}
+  {{- if .Values.job.hookEnabled }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": {{ .Values.job.hookWeight | quote }}
+    "helm.sh/hook-delete-policy": before-hook-creation
+  {{- end }}
+spec:
+  backoffLimit: {{ .Values.job.backoffLimit }}
+  activeDeadlineSeconds: {{ .Values.job.activeDeadlineSeconds }}
+  {{- if .Values.job.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- include "batch-db-migration.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: migration
+        image: {{ include "batch-db-migration.image" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        # Database Configuration
+        - name: DB_HOST
+          value: {{ if .Values.database.host }}{{ .Values.database.host | quote }}{{ else }}{{ printf "%s-%s" .Release.Name "mysql" | quote }}{{ end }}
+        - name: DB_PORT
+          value: {{ .Values.database.port | quote }}
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "batch-db-migration.fullname" . }}-secret
+              key: DB_NAME
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "batch-db-migration.fullname" . }}-secret
+              key: DB_USERNAME
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "batch-db-migration.fullname" . }}-secret
+              key: DB_PASSWORD
+        # Flyway Configuration
+        - name: FLYWAY_BASELINE_ON_MIGRATE
+          value: {{ .Values.flyway.baselineOnMigrate | quote }}
+        - name: FLYWAY_BASELINE_VERSION
+          value: {{ .Values.flyway.baselineVersion | quote }}
+        - name: FLYWAY_LOCATIONS
+          value: {{ .Values.flyway.locations | quote }}
+        {{- if .Values.javaOpts }}
+        - name: JAVA_OPTS
+          value: {{ .Values.javaOpts | quote }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}

@@ -55,6 +55,24 @@ services:
     networks:
       - monolitic-network
 
+  db-migrations:
+    build:
+      context: ../01-db-migrations
+      dockerfile: Dockerfile
+    container_name: 00-monolitic-db-migrations
+    restart: "no"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-monolitic_db}
+      DB_USERNAME: ${DB_USERNAME:-monolitic_user}
+      DB_PASSWORD: ${DB_PASSWORD:-monolitic_password}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - monolitic-network
+
   # 00-monolitic:
   #   build:
   #     context: .
@@ -81,6 +99,8 @@ services:
   #   depends_on:
   #     mysql:
   #       condition: service_healthy
+  #     db-migrations:
+  #       condition: service_completed_successfully
   #   networks:
   #     - monolitic-network
 

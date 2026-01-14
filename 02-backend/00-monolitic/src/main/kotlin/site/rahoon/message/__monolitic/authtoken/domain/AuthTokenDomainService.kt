@@ -34,9 +34,7 @@ class AuthTokenDomainService (
                 error=AuthTokenError.INVALID_TOKEN,
                 details = mapOf("refreshToken" to refreshTokenString)
             )
-        val newToken = issueToken(refreshToken.userId, refreshToken.sessionId)
         authTokenRepository.deleteRefreshToken(refreshToken.token)
-        authTokenRepository.saveRefreshToken(refreshToken)
-        return newToken
+        return issueToken(refreshToken.userId, refreshToken.sessionId)
     }
 }

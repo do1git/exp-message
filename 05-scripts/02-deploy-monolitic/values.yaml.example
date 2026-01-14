@@ -50,6 +50,33 @@ redis:
     port: 6379
 
 # ============================================================================
+# DB Migration Configuration (for Helm chart)
+# ============================================================================
+batch-db-migration:
+  enabled: true
+  image:
+    registry: "localhost:5000"
+    repository: 01-db-migrations
+    tag: "latest"
+    pullPolicy: Always
+  job:
+    hookEnabled: true
+    hookWeight: "-5"
+    backoffLimit: 3
+    activeDeadlineSeconds: 600
+    ttlSecondsAfterFinished: 300
+  database:
+    host: ""                    # Empty to use auto-generated name: Release.Name-mysql
+    port: 3306
+    name: message_db
+    username: message_user
+    password: message_password
+  flyway:
+    baselineOnMigrate: true
+    baselineVersion: "20260113.00"
+    locations: "classpath:db/migration"
+
+# ============================================================================
 # Application Configuration (for Helm chart)
 # ============================================================================
 app-monolitic:
@@ -68,7 +95,7 @@ app-monolitic:
     name: message_db             # Common: message_db
     username: message_user      # Common: message_user
     password: message_password  # Common: message_password
-    ddlAuto: update
+    ddlAuto: validate
   redis:
     host: ""                    # Empty to use auto-generated name: Release.Name-redis
     port: 6379                  # Common: 6379

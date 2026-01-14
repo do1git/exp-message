@@ -1,0 +1,20 @@
+# Gradle
+.gradle/
+build/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Environment
+.env
+*.env.local
+
+# Git
+.git/
+.gitignore
+
+# Misc
+*.md

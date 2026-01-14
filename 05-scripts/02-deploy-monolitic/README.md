@@ -12,6 +12,10 @@
 │   └── _helpers.tpl
 ├── values.yaml              # 개인 설정 파일 (Git ignore, 실제 사용)
 ├── values.yaml.example      # 설정 예시 파일 (Git commit, 참고용)
+├── docker-build-n-push.sh   # 이미지 빌드/푸시 스크립트 (Linux/Mac)
+├── docker-build-n-push.ps1  # 이미지 빌드/푸시 스크립트 (Windows)
+├── helm-deploy.sh           # Helm 배포 스크립트 (Linux/Mac)
+├── helm-deploy.ps1          # Helm 배포 스크립트 (Windows)
 └── README.md
 ```
 
@@ -52,7 +56,9 @@ cp values.yaml.example values.yaml
 `values.yaml`에서 다음 항목들을 수정하세요:
 
 - `mysql.mysql`: 데이터베이스 구축을 위한 설정
-- `app-monolitic.image.registry`: 레지스트리 주소
+- `batch-db-migration.image.registry`: 마이그레이션 이미지 레지스트리 주소
+- `batch-db-migration.database`: 마이그레이션에서 사용할 데이터베이스 연결 설정
+- `app-monolitic.image.registry`: 애플리케이션 이미지 레지스트리 주소
   - 원격 레지스트리를 사용하는 경우 변경필요
 - `app-monolitic.database`: 애플리케이션에서 사용할 데이터베이스 연결 설정
 - `ingress.host`: Ingress 호스트 주소
@@ -62,92 +68,140 @@ cp values.yaml.example values.yaml
 
 ### 이미지 빌드 및 푸시
 
-`values.yaml`의 `app-monolitic.image.registry`에 설정된 레지스트리에 `00-monolitic:latest` 이미지를 빌드하고 푸시합니다.
+`values.yaml`의 이미지 설정을 읽어 자동으로 빌드/푸시하는 스크립트를 제공합니다.
+
+#### 스크립트 사용 (권장)
 
 ```bash
-DOCKER_REGISTRY="localhost:5000"
-docker build -t 00-monolitic:latest ../../02-backend/00-monolitic
-docker tag 00-monolitic:latest $DOCKER_REGISTRY/00-monolitic:latest
-docker push $DOCKER_REGISTRY/00-monolitic:latest
+# Linux/Mac
+./docker-build-n-push.sh
+
+# 도움말
+./docker-build-n-push.sh --help
 ```
 
 ```powershell
-$env:DOCKER_REGISTRY="localhost:5000"
-docker build -t 00-monolitic:latest ..\..\02-backend\00-monolitic
-docker tag 00-monolitic:latest "$env:DOCKER_REGISTRY/00-monolitic:latest"
-docker push "$env:DOCKER_REGISTRY/00-monolitic:latest"
+# Windows
+.\docker-build-n-push.ps1
+
+# 도움말
+.\docker-build-n-push.ps1 -Help
 ```
+
+스크립트는 `values.yaml`에서 다음 설정을 읽어 각 이미지를 빌드/푸시합니다:
+- `app-monolitic.image.registry/repository:tag` → `00-monolitic` 이미지
+- `batch-db-migration.image.registry/repository:tag` → `01-db-migrations` 이미지
 
 ### Helm 차트 배포
 
-Helm 명령어를 직접 사용하여 배포합니다.
+Helm 배포를 위한 스크립트를 제공합니다.
+
+#### 스크립트 사용법
+
+```bash
+# Linux/Mac
+./helm-deploy.sh           # 기본값: upgrade
+./helm-deploy.sh <action>
+
+# 도움말
+./helm-deploy.sh --help
+```
+
+```powershell
+# Windows
+.\helm-deploy.ps1           # 기본값: upgrade
+.\helm-deploy.ps1 <action>
+
+# 도움말
+.\helm-deploy.ps1 -Help
+```
+
+#### 액션 종류
+
+| 액션 | 단축키 | 설명 |
+|------|--------|------|
+| `install` | `c` | 새로운 Release 설치 |
+| `upgrade` | `u` | 기존 Release 업그레이드 (Pod 롤아웃 포함) **[기본값]** |
+| `uninstall` | `d` | Release 삭제 |
+| `logs-app` | `la` | App (00-monolitic) 로그 보기 |
+| `logs-migration` | `lm` | Migration (01-db-migrations) 로그 보기 |
 
 #### 1. 처음 배포시 (Release install)
 
 ```bash
-helm dependency update --kubeconfig=kubeconfig.yaml
-helm install message-stack . --kubeconfig=kubeconfig.yaml --values ./values.yaml
+./helm-deploy.sh install
+# 또는
+./helm-deploy.sh c
+```
 
-# 배포 상태 확인
-kubectl get pods --kubeconfig=kubeconfig=kubeconfig.yaml -l app.kubernetes.io/instance=message-stack
+```powershell
+.\helm-deploy.ps1 install
+# 또는
+.\helm-deploy.ps1 c
 ```
 
 #### 2. 변경 내용 업데이트시 (Release upgrade)
 
 ```bash
-helm dependency update --kubeconfig=kubeconfig.yaml
-helm upgrade message-stack . --kubeconfig=kubeconfig.yaml --values ./values.yaml
-
-# 배포 상태 확인
-kubectl get pods --kubeconfig=kubeconfig=kubeconfig.yaml -l app.kubernetes.io/instance=message-stack
+./helm-deploy.sh            # 기본값
+# 또는
+./helm-deploy.sh u
 ```
+
+```powershell
+.\helm-deploy.ps1            # 기본값
+# 또는
+.\helm-deploy.ps1 u
+```
+
+> **참고**: upgrade 액션은 자동으로 Pod 롤아웃 재시작을 수행합니다. (latest 태그 사용 시 필요)
 
 ### 2-1. 어플리케이션 코드만 수정된 경우
 
 ```bash
-# 0. 도커 레지스트리 지정
-DOCKER_REGISTRY="localhost:5000"
-
 # 1. 새 이미지 빌드 및 푸시
-docker build -t 00-monolitic:latest ../../02-backend/00-monolitic
-docker tag 00-monolitic:latest $DOCKER_REGISTRY/00-monolitic:latest
-docker push $DOCKER_REGISTRY/00-monolitic:latest
+./docker-build-n-push.sh
 
-# 2. Helm upgrade로 새 이미지 배포
-helm dependency update --kubeconfig=kubeconfig.yaml
-helm upgrade message-stack . --kubeconfig=./kubeconfig.yaml --values ./values.yaml
-
-# 3. Pod 강제 재시작 (latest 태그 사용 시 필요)
-# Helm upgrade만으로는 이미지 변경이 감지되지 않을 수 있으므로 pod를 재시작해야 함
-kubectl rollout restart deployment/message-stack-app-monolitic --kubeconfig=./kubeconfig.yaml
-
-# 4. 배포 상태 확인
-kubectl get pods --kubeconfig=./kubeconfig.yaml -l app.kubernetes.io/instance=message-stack
+# 2. Helm upgrade로 새 이미지 배포 (롤아웃 포함)
+./helm-deploy.sh
 ```
 
 ```powershell
-# 0. 도커 레지스트리 지정
-$env:DOCKER_REGISTRY="localhost:5000"
-
 # 1. 새 이미지 빌드 및 푸시
-docker build -t 00-monolitic:latest ..\..\02-backend\00-monolitic
-docker tag 00-monolitic:latest "$env:DOCKER_REGISTRY/00-monolitic:latest"
-docker push "$env:DOCKER_REGISTRY/00-monolitic:latest"
+.\docker-build-n-push.ps1
 
-# 2. Helm upgrade로 새 이미지 배포
-helm dependency update --kubeconfig=kubeconfig.yaml
-helm upgrade message-stack . --kubeconfig=./kubeconfig.yaml --values ./values.yaml
-
-# 3. Pod 강제 재시작 (latest 태그 사용 시 필요)
-# Helm upgrade만으로는 이미지 변경이 감지되지 않을 수 있으므로 pod를 재시작해야 함
-kubectl rollout restart deployment/message-stack-app-monolitic --kubeconfig=./kubeconfig.yaml
-
-# 4. 배포 상태 확인
-kubectl get pods --kubeconfig=./kubeconfig.yaml -l app.kubernetes.io/instance=message-stack
+# 2. Helm upgrade로 새 이미지 배포 (롤아웃 포함)
+.\helm-deploy.ps1
 ```
 
 #### 3. 배포 삭제시 (Release uninstall)
 
 ```bash
-helm uninstall message-stack --kubeconfig=kubeconfig.yaml
+./helm-deploy.sh uninstall
+# 또는
+./helm-deploy.sh d
+```
+
+```powershell
+.\helm-deploy.ps1 uninstall
+# 또는
+.\helm-deploy.ps1 d
+```
+
+#### 4. 로그 보기
+
+```bash
+# App 로그
+./helm-deploy.sh la
+
+# Migration 로그
+./helm-deploy.sh lm
+```
+
+```powershell
+# App 로그
+.\helm-deploy.ps1 la
+
+# Migration 로그
+.\helm-deploy.ps1 lm
 ```

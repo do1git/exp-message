@@ -5,8 +5,11 @@ dependencies:
 - name: redis
   repository: file://../../01-infrastructure/03-redis-mono
   version: 0.1.0
+- name: batch-db-migration
+  repository: file://../../01-infrastructure/04-batch-db-migration
+  version: 0.1.0
 - name: app-monolitic
   repository: file://../../01-infrastructure/02-app-monolitic
   version: 0.1.0
-digest: sha256:1f9fd2b3feb8bfe32138121a41b32516656c9ff1097ca47668b6a75127e66fb0
-generated: "2026-01-12T14:55:36.0962195+09:00"
+digest: sha256:21174bb439328d9e6a8e156fd9eb454889b2be015610d812881f2299900703ce
+generated: "2026-01-14T13:02:27.1246319+09:00"

@@ -1,0 +1,57 @@
+# Application Image Configuration
+image:
+  # For local development (minikube, kind, k3d):
+  # - Build image locally and load into cluster
+  # - Set pullPolicy to IfNotPresent or Never
+  repository: 01-db-migrations
+  tag: "latest"
+  pullPolicy: Always  # IfNotPresent or Never for local images
+  
+  # For production (image registry):
+  # Uncomment and set registry if using image registry:
+  # registry: "your-registry.com"
+  # repository: "namespace/01-db-migrations"
+  # pullPolicy: Always
+
+# Job Configuration
+job:
+  # Helm hook configuration
+  # pre-install: Run before installing the chart
+  # pre-upgrade: Run before upgrading the chart
+  hookEnabled: true
+  hookWeight: "-5"  # Lower weight = runs first
+  
+  # Job settings
+  backoffLimit: 3           # Number of retries before marking job as failed
+  activeDeadlineSeconds: 600  # Max time for job to complete (10 minutes)
+  ttlSecondsAfterFinished: 300  # Cleanup completed job after 5 minutes
+
+# Database Configuration
+database:
+  host: mysql  # Service name of MySQL
+  port: 3306
+  name: message_db
+  username: message_user
+  password: message_password
+
+# Flyway Configuration
+flyway:
+  baselineOnMigrate: true
+  baselineVersion: "20260113.00"
+  locations: "classpath:db/migration"
+
+# Resource Configuration
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "250m"
+
+# Namespace
+namespace: default
+
+# Java Options
+javaOpts: ""
+# Example: "-Xmx256m -Xms128m"

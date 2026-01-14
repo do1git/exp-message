@@ -14,6 +14,10 @@ dependencies:
     version: "0.1.0"
     repository: "file://../../01-infrastructure/03-redis-mono"
     condition: redis.enabled
+  - name: batch-db-migration
+    version: "0.1.0"
+    repository: "file://../../01-infrastructure/04-batch-db-migration"
+    condition: batch-db-migration.enabled
   - name: app-monolitic
     version: "0.1.0"
     repository: "file://../../01-infrastructure/02-app-monolitic"

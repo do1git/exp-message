@@ -32,6 +32,7 @@ dependencies {
 	implementation("org.springframework:spring-tx")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
 	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
@@ -39,11 +40,15 @@ dependencies {
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("com.mysql:mysql-connector-j")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-	testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+	testImplementation("io.mockk:mockk:1.13.13")
 	testImplementation("org.testcontainers:testcontainers:1.19.8")
 	testImplementation("org.testcontainers:junit-jupiter:1.19.8")
-	testRuntimeOnly("com.h2database:h2")
+	testImplementation("org.testcontainers:mysql:1.19.8")
+	testImplementation("com.redis:testcontainers-redis:2.2.2")
+	testImplementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.2")
+	testImplementation("io.kotest:kotest-assertions-core:5.9.1")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -54,7 +59,33 @@ kotlin {
 }
 
 tasks.withType<Test> {
-	useJUnitPlatform()
+	useJUnitPlatform {
+		// 태그 기반 필터링 (gradle -Ptest.tags=unit)
+		val testTags = project.findProperty("test.tags") as String?
+		if (testTags != null) {
+			includeTags(testTags)
+		}
+	}
+}
+
+// 단위 테스트만 실행: ./gradlew unitTest
+// @IntegrationTest가 없는 모든 테스트
+tasks.register<Test>("unitTest") {
+	description = "Run unit tests only (tests without @IntegrationTest)"
+	group = "verification"
+	useJUnitPlatform {
+		excludeTags("integration")
+	}
+}
+
+// 통합 테스트만 실행: ./gradlew integrationTest
+// @IntegrationTest가 붙은 테스트만
+tasks.register<Test>("integrationTest") {
+	description = "Run integration tests only (tests with @IntegrationTest)"
+	group = "verification"
+	useJUnitPlatform {
+		includeTags("integration")
+	}
 }
 
 tasks.bootRun {

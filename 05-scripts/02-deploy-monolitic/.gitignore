@@ -1,9 +1,5 @@
-.env
-kubeconfig.yaml
+# Build logs
+.log/
+
+# Helm values (contains environment-specific secrets)
 values.yaml
-# Helm dependency charts
-charts/
-# Helm package files
-*.tgz
-# Temporary files
-.helm/
