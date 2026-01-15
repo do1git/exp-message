@@ -1,7 +1,7 @@
-package site.rahoon.message.__monolitic.common.global.utils
+package site.rahoon.message.__monolitic.common.controller
 
 /** 현재 인증된 사용자 정보를 담는 객체 */
-data class AuthInfo(
+data class CommonAuthInfo(
     val userId: String,
     val sessionId: String? = null
 )

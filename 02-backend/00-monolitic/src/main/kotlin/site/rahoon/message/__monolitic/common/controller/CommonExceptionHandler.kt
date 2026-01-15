@@ -7,22 +7,19 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.resource.NoResourceFoundException
-import site.rahoon.message.__monolitic.common.application.ApplicationException
-import site.rahoon.message.__monolitic.common.controller.ApiResponse
 import site.rahoon.message.__monolitic.common.domain.DomainException
-import site.rahoon.message.__monolitic.common.domain.ErrorType
+import site.rahoon.message.__monolitic.common.global.ErrorType
 import java.time.ZonedDateTime
 
 /**
  * 전역 예외 핸들러
  */
 @RestControllerAdvice
-class GlobalExceptionHandler {
+class CommonExceptionHandler {
 
-    private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
+    private val logger = LoggerFactory.getLogger(CommonExceptionHandler::class.java)
 
     /**
      * DomainException 처리
@@ -31,7 +28,7 @@ class GlobalExceptionHandler {
     fun handleDomainException(
         e: DomainException,
         request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ResponseEntity<CommonApiResponse<Nothing>> {
         val status = when (e.error.type) {
             ErrorType.NOT_FOUND -> HttpStatus.NOT_FOUND
             ErrorType.CONFLICT -> HttpStatus.CONFLICT
@@ -41,7 +38,7 @@ class GlobalExceptionHandler {
             ErrorType.FORBIDDEN -> HttpStatus.FORBIDDEN
         }
 
-        val response = ApiResponse.error<Nothing>(
+        val response = CommonApiResponse.error<Nothing>(
             code = e.error.code,
             message = e.error.message,
             details = e.details,
@@ -53,39 +50,18 @@ class GlobalExceptionHandler {
     }
 
     /**
-     * ApplicationException 처리
-     */
-    @ExceptionHandler(ApplicationException::class)
-    fun handleApplicationException(
-        e: ApplicationException,
-        request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Nothing>> {
-        val details = e.details?.let { mapOf("detail" to it) }
-
-        val response = ApiResponse.error<Nothing>(
-            code = e.errorCode,
-            message = e.errorMessage,
-            details = details,
-            occurredAt = ZonedDateTime.now(),
-            path = request.requestURI
-        )
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
-    }
-
-    /**
      * Validation 예외 처리
      */
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidationException(
         e: MethodArgumentNotValidException,
         request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ResponseEntity<CommonApiResponse<Nothing>> {
         val errors = e.bindingResult.fieldErrors.associate { 
             it.field to (it.defaultMessage ?: "")
         } as Map<String, Any>
 
-        val response = ApiResponse.error<Nothing>(
+        val response = CommonApiResponse.error<Nothing>(
             code = "VALIDATION_ERROR",
             message = "입력값 검증에 실패했습니다",
             details = errors,
@@ -103,8 +79,8 @@ class GlobalExceptionHandler {
     fun handleNoResourceFoundException(
         e: NoResourceFoundException,
         request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Nothing>> {
-        val response = ApiResponse.error<Nothing>(
+    ): ResponseEntity<CommonApiResponse<Nothing>> {
+        val response = CommonApiResponse.error<Nothing>(
             code = "NOT_FOUND",
             message = "요청한 리소스를 찾을 수 없습니다",
             details = mapOf("resourcePath" to e.resourcePath),
@@ -123,7 +99,7 @@ class GlobalExceptionHandler {
     fun handleHttpMessageNotReadableException(
         e: HttpMessageNotReadableException,
         request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ResponseEntity<CommonApiResponse<Nothing>> {
         val errorMessage = e.message?.let {
             when {
                 it.contains("missing") || it.contains("NULL") -> "필수 필드가 누락되었습니다"
@@ -141,7 +117,7 @@ class GlobalExceptionHandler {
             """.trimMargin()
         )
 
-        val response = ApiResponse.error<Nothing>(
+        val response = CommonApiResponse.error<Nothing>(
             code = "BAD_REQUEST",
             message = errorMessage,
             details = mapOf("originalMessage" to (e.message ?: "")),
@@ -159,7 +135,7 @@ class GlobalExceptionHandler {
     fun handleException(
         e: Exception,
         request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ResponseEntity<CommonApiResponse<Nothing>> {
         val queryString = request.queryString?.let { "?$it" } ?: ""
         logger.error(
             """
@@ -171,7 +147,7 @@ class GlobalExceptionHandler {
             e
         )
 
-        val response = ApiResponse.error<Nothing>(
+        val response = CommonApiResponse.error<Nothing>(
             code = "INTERNAL_SERVER_ERROR",
             message = "서버 오류가 발생했습니다",
             details = null,

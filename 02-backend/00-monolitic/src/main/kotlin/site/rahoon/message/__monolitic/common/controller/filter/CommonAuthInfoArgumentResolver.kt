@@ -1,4 +1,4 @@
-package site.rahoon.message.__monolitic.common.global.utils.authinfo
+package site.rahoon.message.__monolitic.common.controller.filter
 
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.core.MethodParameter
@@ -7,10 +7,10 @@ import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
+import site.rahoon.message.__monolitic.common.controller.AuthInfoAffect
+import site.rahoon.message.__monolitic.common.controller.CommonAuthInfo
 import site.rahoon.message.__monolitic.common.domain.CommonError
 import site.rahoon.message.__monolitic.common.domain.DomainException
-import site.rahoon.message.__monolitic.common.global.utils.AuthInfo
-import site.rahoon.message.__monolitic.common.global.utils.AuthInfoAffect
 
 /**
  * AuthInfo 파라미터를 자동으로 주입하는 ArgumentResolver
@@ -19,14 +19,14 @@ import site.rahoon.message.__monolitic.common.global.utils.AuthInfoAffect
  * Authorization 헤더에서 Bearer 토큰을 추출하여 검증하고, AuthInfo 객체를 생성합니다.
  */
 @Component
-class AuthInfoArgumentResolver(
+class CommonAuthInfoArgumentResolver(
     private val authTokenResolver: AuthTokenResolver
 ) : HandlerMethodArgumentResolver {
 
     override fun supportsParameter(parameter: MethodParameter): Boolean {
         // AuthInfo 타입의 파라미터인지 확인
-        val isAuthInfoType = parameter.parameterType == AuthInfo::class.java ||
-                             parameter.parameterType == AuthInfo::class.javaObjectType
+        val isAuthInfoType = parameter.parameterType == CommonAuthInfo::class.java ||
+                             parameter.parameterType == CommonAuthInfo::class.javaObjectType
         
         if (!isAuthInfoType) {
             return false

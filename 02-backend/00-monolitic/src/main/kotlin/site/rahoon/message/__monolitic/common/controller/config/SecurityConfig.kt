@@ -1,4 +1,4 @@
-package site.rahoon.message.__monolitic.common.global.config
+package site.rahoon.message.__monolitic.common.controller.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

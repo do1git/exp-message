@@ -2,17 +2,19 @@ package site.rahoon.message.__monolitic.message.controller
 
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import site.rahoon.message.__monolitic.common.controller.ApiResponse
-import site.rahoon.message.__monolitic.common.global.utils.AuthInfo
-import site.rahoon.message.__monolitic.common.global.utils.AuthInfoAffect
+import site.rahoon.message.__monolitic.common.controller.CommonApiResponse
+import site.rahoon.message.__monolitic.common.controller.CommonAuthInfo
+import site.rahoon.message.__monolitic.common.controller.AuthInfoAffect
+import site.rahoon.message.__monolitic.common.domain.CommonError
+import site.rahoon.message.__monolitic.common.domain.DomainException
 import site.rahoon.message.__monolitic.message.application.MessageApplicationService
 import site.rahoon.message.__monolitic.message.application.MessageCriteria
 
@@ -32,17 +34,16 @@ class MessageController(
      */
     @PostMapping
     @AuthInfoAffect(required = true)
+    @ResponseStatus(HttpStatus.CREATED)
     fun create(
         @Valid @RequestBody request: MessageRequest.Create,
-        authInfo: AuthInfo
-    ): ResponseEntity<ApiResponse<MessageResponse.Create>> {
+        authInfo: CommonAuthInfo
+    ): CommonApiResponse<MessageResponse.Create> {
         val criteria = request.toCriteria(authInfo.userId)
         val message = messageApplicationService.create(criteria)
         val response = MessageResponse.Create.from(message)
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-            ApiResponse.success(response)
-        )
+        return CommonApiResponse.success(response)
     }
 
     /**
@@ -53,14 +54,12 @@ class MessageController(
     @AuthInfoAffect(required = true)
     fun getById(
         @PathVariable id: String,
-        authInfo: AuthInfo
-    ): ResponseEntity<ApiResponse<MessageResponse.Detail>> {
+        authInfo: CommonAuthInfo
+    ): CommonApiResponse<MessageResponse.Detail> {
         val message = messageApplicationService.getById(id)
         val response = MessageResponse.Detail.from(message)
 
-        return ResponseEntity.status(HttpStatus.OK).body(
-            ApiResponse.success(response)
-        )
+        return CommonApiResponse.success(response)
     }
 
     /**
@@ -71,16 +70,37 @@ class MessageController(
     @AuthInfoAffect(required = true)
     fun getByChatRoomId(
         @RequestParam chatRoomId: String,
-        authInfo: AuthInfo
-    ): ResponseEntity<ApiResponse<List<MessageResponse.Detail>>> {
-        val criteria = MessageCriteria.GetByChatRoomId(
-            chatRoomId = chatRoomId
-        )
-        val messages = messageApplicationService.getByChatRoomId(criteria)
-        val response = messages.map { MessageResponse.Detail.from(it) }
+        @RequestParam(required = false) cursor: String?,
+        @RequestParam(required = false) limit: Int?,
+        authInfo: CommonAuthInfo
+    ): CommonApiResponse.Page<MessageResponse.Detail> {
+        val appliedLimit = when {
+            limit == null -> DEFAULT_LIMIT
+            limit <= 0 -> throw DomainException(
+                error = CommonError.INVALID_PAGE_LIMIT,
+                details = mapOf("limit" to limit, "reason" to "limit must be positive")
+            )
+            limit > MAX_LIMIT -> MAX_LIMIT
+            else -> limit
+        }
 
-        return ResponseEntity.status(HttpStatus.OK).body(
-            ApiResponse.success(response)
+        val criteria = MessageCriteria.GetByChatRoomId(
+            chatRoomId = chatRoomId,
+            cursor = cursor,
+            limit = appliedLimit
         )
+        val result = messageApplicationService.getByChatRoomId(criteria)
+        val response = result.items.map { MessageResponse.Detail.from(it) }
+
+        return CommonApiResponse.Page.success(
+            data = response,
+            nextCursor = result.nextCursor,
+            limit = result.limit
+        )
+    }
+
+    companion object {
+        private const val DEFAULT_LIMIT = 20
+        private const val MAX_LIMIT = 100
     }
 }

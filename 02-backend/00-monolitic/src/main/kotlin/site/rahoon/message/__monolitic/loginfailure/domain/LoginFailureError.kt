@@ -1,7 +1,7 @@
 package site.rahoon.message.__monolitic.loginfailure.domain
 
 import site.rahoon.message.__monolitic.common.domain.DomainError
-import site.rahoon.message.__monolitic.common.domain.ErrorType
+import site.rahoon.message.__monolitic.common.global.ErrorType
 
 /**
  * 로그인 실패 도메인 에러

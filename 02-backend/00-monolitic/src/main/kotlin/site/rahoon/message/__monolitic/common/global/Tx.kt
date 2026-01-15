@@ -1,4 +1,4 @@
-package site.rahoon.message.__monolitic.common.global.utils
+package site.rahoon.message.__monolitic.common.global
 
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component

@@ -6,13 +6,10 @@ import io.mockk.verify
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import site.rahoon.message.__monolitic.chatroom.domain.ChatRoomDomainService
-import site.rahoon.message.__monolitic.chatroom.domain.ChatRoomError
 import site.rahoon.message.__monolitic.chatroom.domain.ChatRoomInfo
 import site.rahoon.message.__monolitic.chatroommember.application.ChatRoomMemberApplicationService
 import site.rahoon.message.__monolitic.chatroommember.domain.ChatRoomMemberInfo
-import site.rahoon.message.__monolitic.common.domain.DomainException
 import java.time.LocalDateTime
 import java.util.UUID
 

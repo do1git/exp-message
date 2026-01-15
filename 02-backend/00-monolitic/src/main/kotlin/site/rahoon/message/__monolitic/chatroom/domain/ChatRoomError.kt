@@ -1,7 +1,7 @@
 package site.rahoon.message.__monolitic.chatroom.domain
 
 import site.rahoon.message.__monolitic.common.domain.DomainError
-import site.rahoon.message.__monolitic.common.domain.ErrorType
+import site.rahoon.message.__monolitic.common.global.ErrorType
 
 enum class ChatRoomError(
     override val code: String,

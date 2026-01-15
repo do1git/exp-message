@@ -1,7 +1,6 @@
 package site.rahoon.message.__monolitic.chatroom.application
 
 import org.springframework.stereotype.Service
-import site.rahoon.message.__monolitic.chatroom.domain.ChatRoomCommand
 import site.rahoon.message.__monolitic.chatroom.domain.ChatRoomDomainService
 import site.rahoon.message.__monolitic.chatroom.domain.ChatRoomError
 import site.rahoon.message.__monolitic.chatroom.domain.ChatRoomInfo

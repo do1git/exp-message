@@ -4,10 +4,17 @@ import org.springframework.stereotype.Service
 import site.rahoon.message.__monolitic.chatroom.domain.ChatRoomError
 import site.rahoon.message.__monolitic.chatroom.domain.ChatRoomDomainService
 import site.rahoon.message.__monolitic.chatroommember.application.ChatRoomMemberApplicationService
+import site.rahoon.message.__monolitic.common.application.CommonPageCursor
+import site.rahoon.message.__monolitic.common.application.CommonResult
+import site.rahoon.message.__monolitic.common.global.Base62Encoding
+import site.rahoon.message.__monolitic.common.global.toEpochMicroLong
+import site.rahoon.message.__monolitic.common.global.toLocalDateTimeFromMicros
 import site.rahoon.message.__monolitic.common.domain.DomainException
 import site.rahoon.message.__monolitic.message.domain.Message
 import site.rahoon.message.__monolitic.message.domain.MessageDomainService
 import site.rahoon.message.__monolitic.message.domain.MessageError
+import java.time.ZoneId
+import java.util.UUID
 
 /**
  * Message Application Service
@@ -17,7 +24,8 @@ import site.rahoon.message.__monolitic.message.domain.MessageError
 class MessageApplicationService(
     private val messageDomainService: MessageDomainService,
     private val chatRoomDomainService: ChatRoomDomainService,
-    private val chatRoomMemberApplicationService: ChatRoomMemberApplicationService
+    private val chatRoomMemberApplicationService: ChatRoomMemberApplicationService,
+    private val zoneId: ZoneId,
 ) {
 
     /**
@@ -69,7 +77,7 @@ class MessageApplicationService(
     /**
      * 채팅방별 메시지 목록 조회
      */
-    fun getByChatRoomId(criteria: MessageCriteria.GetByChatRoomId): List<Message> {
+    fun getByChatRoomId(criteria: MessageCriteria.GetByChatRoomId): CommonResult.Page<Message> {
         // 채팅방 존재 여부 확인
         try {
             chatRoomDomainService.getById(criteria.chatRoomId)
@@ -83,6 +91,51 @@ class MessageApplicationService(
             throw e
         }
 
-        return messageDomainService.getByChatRoomId(criteria.chatRoomId)
+        val decoded = criteria.cursor
+            ?.let { CommonPageCursor.decode(it) }
+            ?.requireVersion("1")
+            ?.requireKeysInOrder(listOf("ca", "i"))
+
+        val afterCreatedAt = decoded?.let {
+            val encodedCreatedAt = it.getAsString("ca")
+            val createdAtMicros = Base62Encoding.decodeLong(encodedCreatedAt)
+            createdAtMicros.toLocalDateTimeFromMicros(zoneId)
+        }
+        val afterId = decoded?.let {
+            val encodedId = it.getAsString("i")
+            val uuid = Base62Encoding.decodeUuid(encodedId)
+            uuid.toString()
+        }
+
+        val fetchSize = criteria.limit + 1
+        val fetched = messageDomainService.getByChatRoomId(
+            chatRoomId = criteria.chatRoomId,
+            afterCreatedAt = afterCreatedAt,
+            afterId = afterId,
+            limit = fetchSize
+        )
+
+        val pageItems = fetched.take(criteria.limit)
+        val hasNext = fetched.size > criteria.limit
+        val nextCursor = if (hasNext && pageItems.isNotEmpty()) {
+            val last = pageItems.last()
+            val createdAtMicros = last.createdAt.toEpochMicroLong(zoneId)
+            CommonPageCursor.encode(
+                version = "1",
+                // 순서 주의! createdAt -> id
+                cursors = listOf(
+                    "ca" to Base62Encoding.encodeLong(createdAtMicros),
+                    "i" to Base62Encoding.encodeUuid(UUID.fromString(last.id))
+                )
+            )
+        } else {
+            null
+        }
+
+        return CommonResult.Page(
+            items = pageItems,
+            nextCursor = nextCursor,
+            limit = criteria.limit
+        )
     }
 }

@@ -14,12 +14,15 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import io.github.oshai.kotlinlogging.KotlinLogging
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import site.rahoon.message.__monolitic.authtoken.application.AuthApplicationITUtils
 import site.rahoon.message.__monolitic.chatroom.controller.ChatRoomRequest
 import site.rahoon.message.__monolitic.chatroom.controller.ChatRoomResponse
 import site.rahoon.message.__monolitic.common.test.IntegrationTestBase
 import site.rahoon.message.__monolitic.common.test.assertError
 import site.rahoon.message.__monolitic.common.test.assertSuccess
+import site.rahoon.message.__monolitic.common.test.assertSuccessPage
 
 /**
  * Message Controller 통합 테스트
@@ -36,6 +39,25 @@ class MessageControllerIT(
 
     private fun baseUrl(): String = "http://localhost:$port/messages"
     private fun chatRoomBaseUrl(): String = "http://localhost:$port/chat-rooms"
+
+    private fun assertSortedByCreatedAtDescThenIdDesc(items: List<MessageResponse.Detail>) {
+        for (i in 0 until items.size - 1) {
+            val a = items[i]
+            val b = items[i + 1]
+
+            when {
+                a.createdAt.isAfter(b.createdAt) -> Unit
+                a.createdAt.isEqual(b.createdAt) -> {
+                    // id desc
+                    (a.id >= b.id) shouldBe true
+                }
+                else -> {
+                    // createdAt desc 위배
+                    false shouldBe true
+                }
+            }
+        }
+    }
 
     /**
      * 채팅방을 생성하고 ID를 반환합니다.
@@ -283,11 +305,12 @@ class MessageControllerIT(
         )
 
         // then
-        response.assertSuccess<List<MessageResponse.Detail>>(objectMapper, HttpStatus.OK) { dataList ->
+        response.assertSuccessPage<MessageResponse.Detail>(objectMapper, HttpStatus.OK) { dataList, pageInfo ->
             dataList.size shouldBeGreaterThanOrEqual 2
             // 최신순 정렬 확인
             dataList[0].content shouldBe "두 번째 메시지"
             dataList[1].content shouldBe "첫 번째 메시지"
+            pageInfo.limit shouldBe 20
         }
     }
 
@@ -343,8 +366,89 @@ class MessageControllerIT(
         )
 
         // then
-        response.assertSuccess<List<MessageResponse.Detail>>(objectMapper, HttpStatus.OK) { dataList ->
+        response.assertSuccessPage<MessageResponse.Detail>(objectMapper, HttpStatus.OK) { dataList, pageInfo ->
             dataList.shouldBeEmpty()
+            pageInfo.nextCursor shouldBe null
+            pageInfo.limit shouldBe 20
         }
+    }
+
+    @Test
+    fun `채팅방별 메시지 목록 조회 - nextCursor로 페이지가 끊김 없이 이어짐`() {
+        // given
+        val authResult = authApplicationITUtils.signUpAndLogin()
+        val chatRoomId = createChatRoom(authResult.accessToken)
+
+        // 메시지 5개 생성(여러 페이지로 나뉘도록)
+        repeat(5) { idx ->
+            sendMessage(authResult.accessToken, chatRoomId, "페이지네이션 메시지 ${idx + 1}")
+            // 동일 createdAt(저장 정밀도)로 인한 플래키를 줄이기 위해 아주 짧게 간격을 둠
+            Thread.sleep(5)
+        }
+
+        val entity = HttpEntity<Nothing?>(null, authResult.headers)
+
+        // when - 1페이지(limit=2)
+        val page1Response = restTemplate.exchange(
+            "${baseUrl()}?chatRoomId=$chatRoomId&limit=2",
+            HttpMethod.GET,
+            entity,
+            String::class.java
+        )
+
+        // then
+        val page1 = page1Response.assertSuccessPage<MessageResponse.Detail>(objectMapper, HttpStatus.OK) { dataList, pageInfo ->
+            dataList.size shouldBe 2
+            pageInfo.limit shouldBe 2
+            pageInfo.nextCursor shouldNotBe null
+            assertSortedByCreatedAtDescThenIdDesc(dataList)
+        }
+
+        // when - 2페이지(nextCursor)
+        val encodedCursor1 = URLEncoder.encode(page1.pageInfo.nextCursor!!, StandardCharsets.UTF_8)
+        val page2Response = restTemplate.exchange(
+            "${baseUrl()}?chatRoomId=$chatRoomId&limit=2&cursor=$encodedCursor1",
+            HttpMethod.GET,
+            entity,
+            String::class.java
+        )
+
+        // then
+        val page2 = page2Response.assertSuccessPage<MessageResponse.Detail>(objectMapper, HttpStatus.OK) { dataList, pageInfo ->
+            dataList.size shouldBe 2
+            pageInfo.limit shouldBe 2
+            pageInfo.nextCursor shouldNotBe null
+            assertSortedByCreatedAtDescThenIdDesc(dataList)
+        }
+
+        // when - 3페이지(마지막 페이지, 남은 1개)
+        val encodedCursor2 = URLEncoder.encode(page2.pageInfo.nextCursor!!, StandardCharsets.UTF_8)
+        val page3Response = restTemplate.exchange(
+            "${baseUrl()}?chatRoomId=$chatRoomId&limit=2&cursor=$encodedCursor2",
+            HttpMethod.GET,
+            entity,
+            String::class.java
+        )
+
+        // then
+        val page3 = page3Response.assertSuccessPage<MessageResponse.Detail>(objectMapper, HttpStatus.OK) { dataList, pageInfo ->
+            dataList.size shouldBe 1
+            pageInfo.limit shouldBe 2
+            // 마지막 페이지(비어있지 않아도) nextCursor는 null이어야 함
+            pageInfo.nextCursor shouldBe null
+            assertSortedByCreatedAtDescThenIdDesc(dataList)
+        }
+
+        // 페이지 연속성 검증(중복/누락 없이 이어짐)
+        val all = page1.data!! + page2.data!! + page3.data!!
+        all.map { it.id }.distinct().size shouldBe 5
+        assertSortedByCreatedAtDescThenIdDesc(all)
+
+        val page1Ids = page1.data!!.map { it.id }.toSet()
+        val page2Ids = page2.data!!.map { it.id }.toSet()
+        val page3Ids = page3.data!!.map { it.id }.toSet()
+        (page1Ids.intersect(page2Ids).isEmpty()) shouldBe true
+        (page1Ids.intersect(page3Ids).isEmpty()) shouldBe true
+        (page2Ids.intersect(page3Ids).isEmpty()) shouldBe true
     }
 }

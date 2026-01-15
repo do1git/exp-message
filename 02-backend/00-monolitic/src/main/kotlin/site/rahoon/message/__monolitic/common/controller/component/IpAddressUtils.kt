@@ -1,4 +1,4 @@
-package site.rahoon.message.__monolitic.common.global.utils
+package site.rahoon.message.__monolitic.common.controller.component
 
 import jakarta.servlet.http.HttpServletRequest
 

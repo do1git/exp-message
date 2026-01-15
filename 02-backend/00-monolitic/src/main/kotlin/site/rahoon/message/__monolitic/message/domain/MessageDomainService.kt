@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import site.rahoon.message.__monolitic.common.domain.DomainException
 import site.rahoon.message.__monolitic.message.domain.component.MessageCreateValidator
+import java.time.LocalDateTime
 
 @Service
 @Transactional(readOnly = true)
@@ -40,7 +41,17 @@ class MessageDomainService(
     /**
      * 채팅방별 메시지 목록을 조회합니다.
      */
-    fun getByChatRoomId(chatRoomId: String): List<Message> {
-        return messageRepository.findByChatRoomIdOrderByCreatedAtDesc(chatRoomId)
+    fun getByChatRoomId(
+        chatRoomId: String,
+        afterCreatedAt: LocalDateTime?,
+        afterId: String?,
+        limit: Int
+    ): List<Message> {
+        return messageRepository.findPageByChatRoomId(
+            chatRoomId = chatRoomId,
+            afterCreatedAt = afterCreatedAt,
+            afterId = afterId,
+            limit = limit
+        )
     }
 }

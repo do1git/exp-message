@@ -15,7 +15,9 @@ import site.rahoon.message.__monolitic.common.domain.DomainException
 import site.rahoon.message.__monolitic.message.domain.Message
 import site.rahoon.message.__monolitic.message.domain.MessageDomainService
 import site.rahoon.message.__monolitic.message.domain.MessageError
+import java.time.Clock
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.UUID
 
 /**
@@ -37,7 +39,8 @@ class MessageApplicationServiceUT {
         messageApplicationService = MessageApplicationService(
             messageDomainService,
             chatRoomDomainService,
-            chatRoomMemberApplicationService
+            chatRoomMemberApplicationService,
+            ZoneId.systemDefault()
         )
     }
 
@@ -205,23 +208,29 @@ class MessageApplicationServiceUT {
         )
 
         val criteria = MessageCriteria.GetByChatRoomId(
-            chatRoomId = chatRoomId
+            chatRoomId = chatRoomId,
+            cursor = null,
+            limit = 20
         )
 
         every { chatRoomDomainService.getById(chatRoomId) } returns chatRoomInfo
-        every { messageDomainService.getByChatRoomId(chatRoomId) } returns listOf(message1, message2)
+        every {
+            messageDomainService.getByChatRoomId(chatRoomId, null, null, 21)
+        } returns listOf(message1, message2)
 
         // when
         val result = messageApplicationService.getByChatRoomId(criteria)
 
         // then
         assertNotNull(result)
-        assertEquals(2, result.size)
-        assertEquals("메시지 1", result[0].content)
-        assertEquals("메시지 2", result[1].content)
+        assertEquals(2, result.items.size)
+        assertEquals("메시지 1", result.items[0].content)
+        assertEquals("메시지 2", result.items[1].content)
+        assertNull(result.nextCursor)
+        assertEquals(20, result.limit)
 
         verify { chatRoomDomainService.getById(chatRoomId) }
-        verify { messageDomainService.getByChatRoomId(chatRoomId) }
+        verify { messageDomainService.getByChatRoomId(chatRoomId, null, null, 21) }
     }
 
     @Test
@@ -230,7 +239,9 @@ class MessageApplicationServiceUT {
         val chatRoomId = UUID.randomUUID().toString()
 
         val criteria = MessageCriteria.GetByChatRoomId(
-            chatRoomId = chatRoomId
+            chatRoomId = chatRoomId,
+            cursor = null,
+            limit = 20
         )
 
         every { chatRoomDomainService.getById(chatRoomId) } throws DomainException(
@@ -245,6 +256,6 @@ class MessageApplicationServiceUT {
 
         assertEquals(MessageError.CHAT_ROOM_NOT_FOUND, exception.error)
         verify { chatRoomDomainService.getById(chatRoomId) }
-        verify(exactly = 0) { messageDomainService.getByChatRoomId(any()) }
+        verify(exactly = 0) { messageDomainService.getByChatRoomId(any(), any(), any(), any()) }
     }
 }

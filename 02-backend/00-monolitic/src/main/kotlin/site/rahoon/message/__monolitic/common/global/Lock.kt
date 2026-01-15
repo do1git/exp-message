@@ -1,10 +1,9 @@
-package site.rahoon.message.__monolitic.common.global.utils
+package site.rahoon.message.__monolitic.common.global
 
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
-import site.rahoon.message.__monolitic.common.global.utils.lock.LockRepository
-import site.rahoon.message.__monolitic.common.global.utils.lock.LockToken
 import java.time.Duration
+import java.time.Instant
 
 @Component
 class Lock(
@@ -38,7 +37,7 @@ class Lock(
             keys: List<String>,
             ttl: Duration = DEFAULT_TTL,
             lockFailException: Exception? = null,
-            action: (locked:Boolean, lockToken:LockToken?) -> T
+            action: (locked:Boolean, lockToken: LockToken?) -> T
         ): T {
             val token = inst.acquireLocks(keys, ttl)
             if(token == null && lockFailException != null) throw lockFailException
@@ -53,7 +52,7 @@ class Lock(
 
     @PostConstruct
     fun init() {
-        Lock.inst = this
+        inst = this
     }
 
     /**
@@ -78,12 +77,20 @@ class Lock(
     }
 }
 
-data class LockResult<T>(
-    val success: Boolean,
-    val value: T?,
+/**
+ * 분산 락 토큰
+ * 락 획득 시 반환되며, 해제 시 이 토큰을 사용합니다.
+ */
+data class LockToken(
+    val keys: List<String>,
+    val lockId: String,
+    val expiresAt: Instant
 ) {
-    companion object {
-        fun <T> success(value: T) = LockResult(true, value)
-        fun <T> fail() = LockResult<T>(false, null)
-    }
+    constructor(key: String, lockId: String, expiresAt: Instant)
+            : this(listOf(key), lockId, expiresAt)
+
+    /**
+     * 락이 만료되었는지 확인합니다.
+     */
+    fun isExpired(): Boolean = Instant.now().isAfter(expiresAt)
 }

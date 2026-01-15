@@ -21,6 +21,8 @@ object MessageCriteria {
     }
 
     data class GetByChatRoomId(
-        val chatRoomId: String
+        val chatRoomId: String,
+        val cursor: String?,
+        val limit: Int
     )
 }

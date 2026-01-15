@@ -1,12 +1,12 @@
-package site.rahoon.message.__monolitic.authtoken.adapter
+package site.rahoon.message.__monolitic.authtoken.infrastructure
 
 import org.springframework.stereotype.Component
 import site.rahoon.message.__monolitic.authtoken.domain.AccessTokenVerifier
 import site.rahoon.message.__monolitic.authtoken.domain.AuthTokenError
 import site.rahoon.message.__monolitic.common.domain.CommonError
 import site.rahoon.message.__monolitic.common.domain.DomainException
-import site.rahoon.message.__monolitic.common.global.utils.AuthInfo
-import site.rahoon.message.__monolitic.common.global.utils.authinfo.AuthTokenResolver
+import site.rahoon.message.__monolitic.common.controller.CommonAuthInfo
+import site.rahoon.message.__monolitic.common.controller.filter.AuthTokenResolver
 
 /**
  * AuthTokenResolver 인터페이스의 구현체
@@ -29,10 +29,10 @@ class AuthTokenResolverImpl(
      * @return AuthInfo (검증된 사용자 정보)
      * @throws DomainException CommonError에 해당하는 DomainException을 던집니다. 토큰이 유효하지 않거나 만료된 경우
      */
-    override fun verify(token: String): AuthInfo {
+    override fun verify(token: String): CommonAuthInfo {
         return try {
             val accessToken = accessTokenVerifier.verify(token)
-            AuthInfo(
+            CommonAuthInfo(
                 userId = accessToken.userId,
                 sessionId = accessToken.sessionId
             )

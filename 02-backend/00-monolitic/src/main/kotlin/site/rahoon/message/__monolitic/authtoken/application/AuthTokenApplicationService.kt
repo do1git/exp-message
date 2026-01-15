@@ -5,7 +5,7 @@ import site.rahoon.message.__monolitic.authtoken.domain.AccessToken
 import site.rahoon.message.__monolitic.authtoken.domain.AuthToken
 import site.rahoon.message.__monolitic.authtoken.domain.AuthTokenDomainService
 import site.rahoon.message.__monolitic.common.domain.DomainException
-import site.rahoon.message.__monolitic.common.global.utils.Lock
+import site.rahoon.message.__monolitic.common.global.Lock
 import site.rahoon.message.__monolitic.loginfailure.domain.LoginFailureError
 import site.rahoon.message.__monolitic.loginfailure.domain.LoginFailureTracker
 import site.rahoon.message.__monolitic.user.domain.UserDomainService

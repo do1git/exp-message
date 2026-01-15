@@ -3,8 +3,8 @@ package site.rahoon.message.__monolitic.common.infrastructure
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.script.DefaultRedisScript
 import org.springframework.stereotype.Repository
-import site.rahoon.message.__monolitic.common.global.utils.lock.LockRepository
-import site.rahoon.message.__monolitic.common.global.utils.lock.LockToken
+import site.rahoon.message.__monolitic.common.global.LockToken
+import site.rahoon.message.__monolitic.common.global.LockRepository
 import java.time.Duration
 import java.time.Instant
 import java.util.UUID

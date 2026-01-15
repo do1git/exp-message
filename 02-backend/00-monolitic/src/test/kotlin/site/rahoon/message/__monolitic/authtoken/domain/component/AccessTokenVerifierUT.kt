@@ -1,20 +1,16 @@
 package site.rahoon.message.__monolitic.authtoken.domain.component
 
-import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import site.rahoon.message.__monolitic.authtoken.domain.AccessToken
 import site.rahoon.message.__monolitic.authtoken.domain.AccessTokenIssuer
 import site.rahoon.message.__monolitic.authtoken.domain.AccessTokenVerifier
 import site.rahoon.message.__monolitic.authtoken.domain.AuthTokenProperties
 import site.rahoon.message.__monolitic.common.domain.DomainException
 import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.*
 
 /**

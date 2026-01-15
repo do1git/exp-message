@@ -1,4 +1,4 @@
-package site.rahoon.message.__monolitic.common.controller
+package site.rahoon.message.__monolitic.common.controller.config
 
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.method.HandlerMethod
-import site.rahoon.message.__monolitic.common.global.utils.AuthInfo
-import site.rahoon.message.__monolitic.common.global.utils.AuthInfoAffect
+import site.rahoon.message.__monolitic.common.controller.CommonAuthInfo
+import site.rahoon.message.__monolitic.common.controller.AuthInfoAffect
 
 /**
  * OpenAPI (Swagger) 설정
@@ -245,8 +245,8 @@ class OpenApiConfig {
             val authInfoMethodParams = methodParameters
                 .asSequence()
                 .filter { methodParam ->
-                    methodParam.parameterType == AuthInfo::class.java ||
-                        methodParam.parameterType == AuthInfo::class.javaObjectType
+                    methodParam.parameterType == CommonAuthInfo::class.java ||
+                        methodParam.parameterType == CommonAuthInfo::class.javaObjectType
                 }
                 .toList()
 

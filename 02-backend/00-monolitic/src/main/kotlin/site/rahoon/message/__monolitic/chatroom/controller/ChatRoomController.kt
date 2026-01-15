@@ -2,7 +2,6 @@ package site.rahoon.message.__monolitic.chatroom.controller
 
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -10,12 +9,13 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import site.rahoon.message.__monolitic.chatroom.application.ChatRoomApplicationService
 import site.rahoon.message.__monolitic.chatroom.application.ChatRoomCriteria
-import site.rahoon.message.__monolitic.common.controller.ApiResponse
-import site.rahoon.message.__monolitic.common.global.utils.AuthInfo
-import site.rahoon.message.__monolitic.common.global.utils.AuthInfoAffect
+import site.rahoon.message.__monolitic.common.controller.CommonApiResponse
+import site.rahoon.message.__monolitic.common.controller.CommonAuthInfo
+import site.rahoon.message.__monolitic.common.controller.AuthInfoAffect
 
 /**
  * 채팅방 관련 Controller
@@ -33,17 +33,16 @@ class ChatRoomController(
      */
     @PostMapping
     @AuthInfoAffect(required = true)
+    @ResponseStatus(HttpStatus.CREATED)
     fun create(
         @Valid @RequestBody request: ChatRoomRequest.Create,
-        authInfo: AuthInfo
-    ): ResponseEntity<ApiResponse<ChatRoomResponse.Create>> {
+        authInfo: CommonAuthInfo
+    ): CommonApiResponse<ChatRoomResponse.Create> {
         val criteria = request.toCriteria(authInfo.userId)
         val chatRoomInfo = chatRoomApplicationService.create(criteria)
         val response = ChatRoomResponse.Create.from(chatRoomInfo)
         
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-            ApiResponse.success(response)
-        )
+        return CommonApiResponse.success(response)
     }
 
     /**
@@ -54,14 +53,12 @@ class ChatRoomController(
     @AuthInfoAffect(required = true)
     fun getById(
         @PathVariable id: String,
-        authInfo: AuthInfo
-    ): ResponseEntity<ApiResponse<ChatRoomResponse.Detail>> {
+        authInfo: CommonAuthInfo
+    ): CommonApiResponse<ChatRoomResponse.Detail> {
         val chatRoomInfo = chatRoomApplicationService.getById(id)
         val response = ChatRoomResponse.Detail.from(chatRoomInfo)
         
-        return ResponseEntity.status(HttpStatus.OK).body(
-            ApiResponse.success(response)
-        )
+        return CommonApiResponse.success(response)
     }
 
     /**
@@ -71,14 +68,12 @@ class ChatRoomController(
     @GetMapping
     @AuthInfoAffect(required = true)
     fun getMyChatRooms(
-        authInfo: AuthInfo
-    ): ResponseEntity<ApiResponse<List<ChatRoomResponse.ListItem>>> {
+        authInfo: CommonAuthInfo
+    ): CommonApiResponse<List<ChatRoomResponse.ListItem>> {
         val chatRoomInfoList = chatRoomApplicationService.getByMemberUserId(authInfo.userId)
         val response = chatRoomInfoList.map { ChatRoomResponse.ListItem.from(it) }
         
-        return ResponseEntity.status(HttpStatus.OK).body(
-            ApiResponse.success(response)
-        )
+        return CommonApiResponse.success(response)
     }
 
     /**
@@ -90,15 +85,13 @@ class ChatRoomController(
     fun update(
         @PathVariable id: String,
         @Valid @RequestBody request: ChatRoomRequest.Update,
-        authInfo: AuthInfo
-    ): ResponseEntity<ApiResponse<ChatRoomResponse.Detail>> {
+        authInfo: CommonAuthInfo
+    ): CommonApiResponse<ChatRoomResponse.Detail> {
         val criteria = request.toCriteria(id, authInfo.userId)
         val chatRoomInfo = chatRoomApplicationService.update(criteria)
         val response = ChatRoomResponse.Detail.from(chatRoomInfo)
         
-        return ResponseEntity.status(HttpStatus.OK).body(
-            ApiResponse.success(response)
-        )
+        return CommonApiResponse.success(response)
     }
 
     /**
@@ -109,8 +102,8 @@ class ChatRoomController(
     @AuthInfoAffect(required = true)
     fun delete(
         @PathVariable id: String,
-        authInfo: AuthInfo
-    ): ResponseEntity<ApiResponse<ChatRoomResponse.Detail>> {
+        authInfo: CommonAuthInfo
+    ): CommonApiResponse<ChatRoomResponse.Detail> {
         val criteria = ChatRoomCriteria.Delete(
             chatRoomId = id,
             userId = authInfo.userId
@@ -118,8 +111,6 @@ class ChatRoomController(
         val chatRoomInfo = chatRoomApplicationService.delete(criteria)
         val response = ChatRoomResponse.Detail.from(chatRoomInfo)
         
-        return ResponseEntity.status(HttpStatus.OK).body(
-            ApiResponse.success(response)
-        )
+        return CommonApiResponse.success(response)
     }
 }

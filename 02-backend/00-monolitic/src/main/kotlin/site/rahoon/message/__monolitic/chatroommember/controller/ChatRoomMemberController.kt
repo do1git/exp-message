@@ -1,17 +1,17 @@
 package site.rahoon.message.__monolitic.chatroommember.controller
 
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import site.rahoon.message.__monolitic.chatroommember.application.ChatRoomMemberApplicationService
-import site.rahoon.message.__monolitic.common.controller.ApiResponse
-import site.rahoon.message.__monolitic.common.global.utils.AuthInfo
-import site.rahoon.message.__monolitic.common.global.utils.AuthInfoAffect
+import site.rahoon.message.__monolitic.common.controller.CommonApiResponse
+import site.rahoon.message.__monolitic.common.controller.CommonAuthInfo
+import site.rahoon.message.__monolitic.common.controller.AuthInfoAffect
 
 /**
  * 채팅방 멤버 관련 Controller
@@ -29,17 +29,16 @@ class ChatRoomMemberController(
      */
     @PostMapping
     @AuthInfoAffect(required = true)
+    @ResponseStatus(HttpStatus.CREATED)
     fun join(
         @PathVariable chatRoomId: String,
-        authInfo: AuthInfo
-    ): ResponseEntity<ApiResponse<ChatRoomMemberResponse.Member>> {
+        authInfo: CommonAuthInfo
+    ): CommonApiResponse<ChatRoomMemberResponse.Member> {
         val criteria = ChatRoomMemberRequest.toJoinCriteria(chatRoomId, authInfo.userId)
         val memberInfo = chatRoomMemberApplicationService.join(criteria)
         val response = ChatRoomMemberResponse.Member.from(memberInfo)
         
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-            ApiResponse.success(response)
-        )
+        return CommonApiResponse.success(response)
     }
 
     /**
@@ -50,15 +49,13 @@ class ChatRoomMemberController(
     @AuthInfoAffect(required = true)
     fun leave(
         @PathVariable chatRoomId: String,
-        authInfo: AuthInfo
-    ): ResponseEntity<ApiResponse<ChatRoomMemberResponse.Member>> {
+        authInfo: CommonAuthInfo
+    ): CommonApiResponse<ChatRoomMemberResponse.Member> {
         val criteria = ChatRoomMemberRequest.toLeaveCriteria(chatRoomId, authInfo.userId)
         val memberInfo = chatRoomMemberApplicationService.leave(criteria)
         val response = ChatRoomMemberResponse.Member.from(memberInfo)
         
-        return ResponseEntity.status(HttpStatus.OK).body(
-            ApiResponse.success(response)
-        )
+        return CommonApiResponse.success(response)
     }
 
     /**
@@ -69,13 +66,11 @@ class ChatRoomMemberController(
     @AuthInfoAffect(required = true)
     fun getMembers(
         @PathVariable chatRoomId: String,
-        authInfo: AuthInfo
-    ): ResponseEntity<ApiResponse<List<ChatRoomMemberResponse.ListItem>>> {
+        authInfo: CommonAuthInfo
+    ): CommonApiResponse<List<ChatRoomMemberResponse.ListItem>> {
         val memberInfoList = chatRoomMemberApplicationService.getByChatRoomId(chatRoomId)
         val response = memberInfoList.map { ChatRoomMemberResponse.ListItem.from(it) }
         
-        return ResponseEntity.status(HttpStatus.OK).body(
-            ApiResponse.success(response)
-        )
+        return CommonApiResponse.success(response)
     }
 }

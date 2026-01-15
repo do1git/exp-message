@@ -1,9 +1,8 @@
-package site.rahoon.message.__monolitic.common.global.utils
+package site.rahoon.message.__monolitic.common.global
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import site.rahoon.message.__monolitic.common.global.utils.lock.LockToken
 import site.rahoon.message.__monolitic.common.test.IntegrationTestBase
 import java.time.Duration
 import java.time.Instant

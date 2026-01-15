@@ -1,4 +1,4 @@
-package site.rahoon.message.__monolitic.common.global.utils.lock
+package site.rahoon.message.__monolitic.common.global
 
 import java.time.Duration
 

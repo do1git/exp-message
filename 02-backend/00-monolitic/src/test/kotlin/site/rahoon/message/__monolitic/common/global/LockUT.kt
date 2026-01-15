@@ -1,4 +1,4 @@
-package site.rahoon.message.__monolitic.common.global.utils
+package site.rahoon.message.__monolitic.common.global
 
 import io.mockk.every
 import io.mockk.mockk
@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import site.rahoon.message.__monolitic.common.global.utils.lock.LockRepository
-import site.rahoon.message.__monolitic.common.global.utils.lock.LockToken
 import java.time.Duration
 import java.time.Instant
 

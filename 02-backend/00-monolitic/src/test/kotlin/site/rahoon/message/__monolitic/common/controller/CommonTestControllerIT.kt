@@ -16,7 +16,7 @@ import site.rahoon.message.__monolitic.common.test.assertSuccess
  * Test Controller E2E 테스트
  * 실제 HTTP 요청을 통해 전체 스택을 테스트합니다.
  */
-class TestControllerIT(
+class CommonTestControllerIT(
     private val restTemplate: TestRestTemplate,
     private val objectMapper: ObjectMapper,
     @LocalServerPort private var port: Int = 0
