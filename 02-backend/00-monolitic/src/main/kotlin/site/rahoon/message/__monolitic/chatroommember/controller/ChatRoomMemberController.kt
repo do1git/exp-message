@@ -27,7 +27,7 @@ class ChatRoomMemberController(
      * 채팅방 참가
      * POST /chat-rooms/{chatRoomId}/members
      */
-    @PostMapping
+    @PostMapping("/me")
     @AuthInfoAffect(required = true)
     @ResponseStatus(HttpStatus.CREATED)
     fun join(
