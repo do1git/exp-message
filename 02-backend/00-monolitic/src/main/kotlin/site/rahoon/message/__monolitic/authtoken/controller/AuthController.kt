@@ -28,25 +28,26 @@ class AuthController(
      * 로그인
      * POST /auth/login
      */
-    @PostMapping("/login")
-    fun login(
-        @Valid @RequestBody request: AuthRequest.Login,
-        httpRequest: HttpServletRequest
-    ): ResponseEntity<ApiResponse<AuthResponse.Login>> {
-        val ipAddress = IpAddressUtils.getClientIpAddress(httpRequest)
-        val authToken = authTokenApplicationService.login(
-            email = request.email,
-            password = request.password,
-            ipAddress = ipAddress
-        )
-        val response = AuthResponse.Login.from(authToken)
-        
-        return ResponseEntity.status(HttpStatus.OK).body(
-            ApiResponse.success(response)
-        )
-    }
+//    @Deprecated("Use /login instead")
+//    @PostMapping("/login-without-lock")
+//    fun loginWithoutLock(
+//        @Valid @RequestBody request: AuthRequest.Login,
+//        httpRequest: HttpServletRequest
+//    ): ResponseEntity<ApiResponse<AuthResponse.Login>> {
+//        val ipAddress = IpAddressUtils.getClientIpAddress(httpRequest)
+//        val authToken = authTokenApplicationService.login(
+//            email = request.email,
+//            password = request.password,
+//            ipAddress = ipAddress
+//        )
+//        val response = AuthResponse.Login.from(authToken)
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(
+//            ApiResponse.success(response)
+//        )
+//    }
 
-    @PostMapping("/login-with-lock")
+    @PostMapping("/login")
     fun loginWithLock(
         @Valid @RequestBody request: AuthRequest.Login,
         httpRequest: HttpServletRequest

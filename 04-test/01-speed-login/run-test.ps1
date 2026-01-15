@@ -3,7 +3,7 @@
 # ============================================================
 
 param(
-    [string]$BaseUrl = "https://message.rahoon.site/api",
+    [string]$BaseUrl = "http://localhost:8080",
     [string]$TestScript = "login-race-condition-compare.js",
     [switch]$SaveJson,
     [switch]$Verbose

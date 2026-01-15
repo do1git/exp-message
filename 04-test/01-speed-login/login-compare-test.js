@@ -11,7 +11,7 @@ const TEST_PASSWORD = __ENV.TEST_PASSWORD || 'wrongpassword';
 const TEST_IP = __ENV.TEST_IP || '10.0.0.';
 
 // ============================================================
-// 커스텀 메트릭 - /login (락 없음)
+// 커스텀 메트릭 - /login-without-lock (락 없음)
 // ============================================================
 const loginNoLock_USER001 = new Counter('login_no_lock_USER001');
 const loginNoLock_LOCKED = new Counter('login_no_lock_LOCKED');
@@ -19,7 +19,7 @@ const loginNoLock_OTHER = new Counter('login_no_lock_OTHER');
 const loginNoLock_Duration = new Trend('login_no_lock_duration', true);
 
 // ============================================================
-// 커스텀 메트릭 - /login-with-lock (락 있음)
+// 커스텀 메트릭 - /login (락 있음)
 // ============================================================
 const loginWithLock_USER001 = new Counter('login_with_lock_USER001');
 const loginWithLock_LOCKED = new Counter('login_with_lock_LOCKED');
@@ -31,7 +31,7 @@ const loginWithLock_Duration = new Trend('login_with_lock_duration', true);
 // ============================================================
 export const options = {
   scenarios: {
-    // 1단계: /login (락 없음) 테스트
+    // 1단계: /login-without-lock (락 없음) 테스트
     login_no_lock: {
       executor: 'shared-iterations',
       vus: 20,
@@ -62,16 +62,16 @@ export const options = {
 // ============================================================
 export function setup() {
   console.log(`\n${'='.repeat(70)}`);
-  console.log('🔬 로그인 성능 비교 테스트: /login vs /login-with-lock');
+  console.log('🔬 로그인 성능 비교 테스트: /login-without-lock vs /login');
   console.log(`${'='.repeat(70)}`);
   console.log(`📍 Base URL: ${BASE_URL}`);
   console.log(`📧 Test Email: ${TEST_EMAIL}`);
   console.log(`👥 VUs: 20, Iterations: 20 (각 시나리오)`);
   console.log(`${'='.repeat(70)}`);
   console.log('\n📋 테스트 순서:');
-  console.log('  1. /auth/login (락 없음) - 20 VU x 20 iterations');
+  console.log('  1. /auth/login-without-lock (락 없음) - 20 VU x 20 iterations');
   console.log('  2. 5초 대기');
-  console.log('  3. /auth/login-with-lock (락 있음) - 20 VU x 20 iterations');
+  console.log('  3. /auth/login (락 있음) - 20 VU x 20 iterations');
   console.log(`${'='.repeat(70)}\n`);
 
   return {
@@ -83,7 +83,7 @@ export function setup() {
 }
 
 // ============================================================
-// 테스트 1: /login (락 없음)
+// 테스트 1: /login-without-lock (락 없음)
 // ============================================================
 export function testLoginNoLock(data) {
   const uniqueId = `${Date.now()}-${__VU}-${__ITER}`;
@@ -103,7 +103,7 @@ export function testLoginNoLock(data) {
   };
 
   const startTime = Date.now();
-  const response = http.post(`${data.baseUrl}/auth/login`, payload, params);
+  const response = http.post(`${data.baseUrl}/auth/login-without-lock`, payload, params);
   const duration = Date.now() - startTime;
 
   loginNoLock_Duration.add(duration);
@@ -119,7 +119,7 @@ export function testLoginNoLock(data) {
 }
 
 // ============================================================
-// 테스트 2: /login-with-lock (락 있음)
+// 테스트 2: /login (락 있음)
 // ============================================================
 export function testLoginWithLock(data) {
   const uniqueId = `${Date.now()}-${__VU}-${__ITER}`;
@@ -139,7 +139,7 @@ export function testLoginWithLock(data) {
   };
 
   const startTime = Date.now();
-  const response = http.post(`${data.baseUrl}/auth/login-with-lock`, payload, params);
+  const response = http.post(`${data.baseUrl}/auth/login`, payload, params);
   const duration = Date.now() - startTime;
 
   loginWithLock_Duration.add(duration);
@@ -189,8 +189,8 @@ export function teardown(data) {
   console.log('📊 성능 비교 테스트 완료');
   console.log(`${'='.repeat(70)}`);
   console.log('\n📈 결과 해석 가이드:');
-  console.log('  - login_no_lock_duration: /login 응답 시간');
-  console.log('  - login_with_lock_duration: /login-with-lock 응답 시간');
+  console.log('  - login_no_lock_duration: /login-without-lock 응답 시간');
+  console.log('  - login_with_lock_duration: /login 응답 시간');
   console.log('  - *_USER001: 로그인 실패 (비밀번호 오류) 횟수');
   console.log('  - *_LOCKED: 계정 잠금 또는 락 획득 실패 횟수');
   console.log(`${'='.repeat(70)}\n`);

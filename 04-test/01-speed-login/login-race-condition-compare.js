@@ -67,13 +67,13 @@ export function setup() {
   const withLockIp = `10.2.2.${timestamp % 255}`;
 
   console.log(`\n${'='.repeat(70)}`);
-  console.log('🏁 Race Condition 비교 테스트: /login vs /login-with-lock');
+  console.log('🏁 Race Condition 비교 테스트: /login-without-lock vs /login');
   console.log(`${'='.repeat(70)}`);
   console.log(`📍 Base URL: ${BASE_URL}`);
-  console.log(`\n📋 시나리오 1 - /login (락 없음):`);
+  console.log(`\n📋 시나리오 1 - /login-without-lock (락 없음):`);
   console.log(`   Email: ${noLockEmail}`);
   console.log(`   IP: ${noLockIp}`);
-  console.log(`\n📋 시나리오 2 - /login-with-lock (락 있음):`);
+  console.log(`\n📋 시나리오 2 - /login (락 있음):`);
   console.log(`   Email: ${withLockEmail}`);
   console.log(`   IP: ${withLockIp}`);
   console.log(`\n👥 각 시나리오: 20 VU가 동일 계정으로 동시 공격`);
@@ -106,7 +106,7 @@ export function testRaceNoLock(data) {
   };
 
   const startTime = Date.now();
-  const response = http.post(`${data.baseUrl}/auth/login`, payload, params);
+  const response = http.post(`${data.baseUrl}/auth/login-without-lock`, payload, params);
   const duration = Date.now() - startTime;
 
   noLock_Duration.add(duration);
@@ -138,7 +138,7 @@ export function testRaceWithLock(data) {
   };
 
   const startTime = Date.now();
-  const response = http.post(`${data.baseUrl}/auth/login-with-lock`, payload, params);
+  const response = http.post(`${data.baseUrl}/auth/login`, payload, params);
   const duration = Date.now() - startTime;
 
   withLock_Duration.add(duration);
@@ -190,8 +190,8 @@ export function teardown(data) {
   console.log('\n🔍 결과 비교 포인트:');
   console.log('');
   console.log('  1. 응답 시간 비교:');
-  console.log('     - no_lock_duration: /login 응답 시간 분포');
-  console.log('     - with_lock_duration: /login-with-lock 응답 시간 분포');
+  console.log('     - no_lock_duration: /login-without-lock 응답 시간 분포');
+  console.log('     - with_lock_duration: /login 응답 시간 분포');
   console.log('');
   console.log('  2. Race Condition 방지 효과:');
   console.log('     - no_lock_USER001: 락 없이 로그인 실패 처리된 횟수');
