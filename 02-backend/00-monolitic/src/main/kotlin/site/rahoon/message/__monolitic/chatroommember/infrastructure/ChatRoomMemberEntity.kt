@@ -1,6 +1,7 @@
 package site.rahoon.message.__monolitic.chatroommember.infrastructure
 
 import jakarta.persistence.*
+import site.rahoon.message.__monolitic.common.infrastructure.JpaEntityBase
 import java.time.LocalDateTime
 
 /**
@@ -18,7 +19,7 @@ import java.time.LocalDateTime
 class ChatRoomMemberEntity(
     @Id
     @Column(name = "id", length = 36)
-    var id: String,
+    override var id: String,
 
     @Column(name = "chat_room_id", nullable = false, length = 36)
     var chatRoomId: String,
@@ -28,6 +29,6 @@ class ChatRoomMemberEntity(
 
     @Column(name = "joined_at", nullable = false)
     var joinedAt: LocalDateTime
-) {
+):JpaEntityBase() {
     constructor() : this("", "", "", LocalDateTime.now())
 }

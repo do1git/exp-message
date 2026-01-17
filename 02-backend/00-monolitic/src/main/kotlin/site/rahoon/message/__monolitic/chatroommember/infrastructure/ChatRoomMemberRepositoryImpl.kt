@@ -1,17 +1,20 @@
 package site.rahoon.message.__monolitic.chatroommember.infrastructure
 
-import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import site.rahoon.message.__monolitic.chatroommember.domain.ChatRoomMember
 import site.rahoon.message.__monolitic.chatroommember.domain.ChatRoomMemberRepository
+import site.rahoon.message.__monolitic.common.global.TransactionalRepository
+import java.time.LocalDateTime
 
 /**
  * ChatRoomMemberRepository 인터페이스의 JPA 구현체
  */
-@Repository
+@TransactionalRepository
 class ChatRoomMemberRepositoryImpl(
     private val jpaRepository: ChatRoomMemberJpaRepository
 ) : ChatRoomMemberRepository {
 
+    @Transactional
     override fun save(chatRoomMember: ChatRoomMember): ChatRoomMember {
         val entity = toEntity(chatRoomMember)
         val savedEntity = jpaRepository.save(entity)
@@ -33,8 +36,9 @@ class ChatRoomMemberRepositoryImpl(
             .map { toDomain(it) }
     }
 
+    @Transactional
     override fun delete(chatRoomId: String, userId: String) {
-        jpaRepository.deleteByChatRoomIdAndUserId(chatRoomId, userId)
+        jpaRepository.softDeleteByChatRoomIdAndUserId(chatRoomId, userId, LocalDateTime.now())
     }
 
     private fun toEntity(chatRoomMember: ChatRoomMember): ChatRoomMemberEntity {

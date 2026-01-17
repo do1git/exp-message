@@ -5,10 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import site.rahoon.message.__monolitic.common.infrastructure.JpaSoftDeleteRepository
 import java.time.LocalDateTime
 
 @Repository
-interface MessageJpaRepository : JpaRepository<MessageEntity, String> {
+interface MessageJpaRepository : JpaSoftDeleteRepository<MessageEntity, String> {
     fun findByChatRoomIdOrderByCreatedAtDescIdDesc(chatRoomId: String, pageable: Pageable): List<MessageEntity>
 
     @Query(

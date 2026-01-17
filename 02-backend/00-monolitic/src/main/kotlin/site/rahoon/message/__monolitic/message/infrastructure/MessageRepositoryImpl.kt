@@ -1,7 +1,10 @@
 package site.rahoon.message.__monolitic.message.infrastructure
 
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
+import site.rahoon.message.__monolitic.common.global.TransactionalRepository
 import site.rahoon.message.__monolitic.message.domain.Message
 import site.rahoon.message.__monolitic.message.domain.MessageRepository
 import java.time.LocalDateTime
@@ -9,11 +12,12 @@ import java.time.LocalDateTime
 /**
  * MessageRepository 인터페이스의 JPA 구현체
  */
-@Repository
+@TransactionalRepository
 class MessageRepositoryImpl(
     private val jpaRepository: MessageJpaRepository
 ) : MessageRepository {
 
+    @Transactional
     override fun save(message: Message): Message {
         val entity = toEntity(message)
         val savedEntity = jpaRepository.save(entity)
@@ -21,9 +25,7 @@ class MessageRepositoryImpl(
     }
 
     override fun findById(id: String): Message? {
-        return jpaRepository.findById(id)
-            .map { toDomain(it) }
-            .orElse(null)
+        return jpaRepository.findByIdOrNull(id)?.let { toDomain(it) }
     }
 
     override fun findPageByChatRoomId(

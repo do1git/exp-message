@@ -1,7 +1,9 @@
 package site.rahoon.message.__monolitic.common.test
 
 import org.junit.jupiter.api.Tag
+import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.test.context.TestConstructor
 
 /**
@@ -31,6 +33,11 @@ import org.springframework.test.context.TestConstructor
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @Tag("integration")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = [site.rahoon.message.__monolitic.Application::class]
+)
+@EntityScan(basePackages = ["site.rahoon.message.__monolitic"])
+@EnableJpaRepositories(basePackages = ["site.rahoon.message.__monolitic"])
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 annotation class IntegrationTest

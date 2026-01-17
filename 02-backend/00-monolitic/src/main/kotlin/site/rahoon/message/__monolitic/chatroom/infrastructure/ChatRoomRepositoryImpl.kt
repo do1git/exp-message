@@ -1,28 +1,29 @@
 package site.rahoon.message.__monolitic.chatroom.infrastructure
 
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import site.rahoon.message.__monolitic.chatroom.domain.ChatRoom
 import site.rahoon.message.__monolitic.chatroom.domain.ChatRoomRepository
+import site.rahoon.message.__monolitic.common.global.TransactionalRepository
+import java.time.LocalDateTime
 
 /**
  * ChatRoomRepository 인터페이스의 JPA 구현체
  */
-@Repository
+@TransactionalRepository
 class ChatRoomRepositoryImpl(
     private val jpaRepository: ChatRoomJpaRepository
 ) : ChatRoomRepository {
 
+    @Transactional
     override fun save(chatRoom: ChatRoom): ChatRoom {
         val entity = toEntity(chatRoom)
         val savedEntity = jpaRepository.save(entity)
         return toDomain(savedEntity)
     }
 
-    override fun findById(id: String): ChatRoom? {
-        return jpaRepository.findById(id)
-            .map { toDomain(it) }
-            .orElse(null)
-    }
+    override fun findById(id: String): ChatRoom?
+       = jpaRepository.findByIdOrNull(id)?.let { toDomain(it) }
 
     override fun findByIds(ids: List<String>): List<ChatRoom> {
         if (ids.isEmpty()) return emptyList()
@@ -36,7 +37,7 @@ class ChatRoomRepositoryImpl(
     }
 
     override fun delete(id: String) {
-        jpaRepository.deleteById(id)
+        jpaRepository.softDeleteById(id, LocalDateTime.now())
     }
 
     private fun toEntity(chatRoom: ChatRoom): ChatRoomEntity {

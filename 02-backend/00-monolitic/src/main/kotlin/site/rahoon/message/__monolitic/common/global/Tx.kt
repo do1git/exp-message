@@ -23,7 +23,7 @@ class Tx(private val transactionManager: PlatformTransactionManager) {
             timeout: Int = TransactionDefinition.TIMEOUT_DEFAULT,
             readOnly: Boolean = false,
             action: () -> T
-        ): T {
+        ): T? {
             return inst.execute(isolationLevel, propagation, timeout, readOnly, action)
         }
     }
@@ -49,14 +49,14 @@ class Tx(private val transactionManager: PlatformTransactionManager) {
         timeout: Int = TransactionDefinition.TIMEOUT_DEFAULT,
         readOnly: Boolean = false,
         action: () -> T
-    ): T {
+    ): T? {
         val transactionTemplate = TransactionTemplate(transactionManager).apply {
             this.isolationLevel = isolationLevel
             this.propagationBehavior = propagation
             this.timeout = timeout
             this.isReadOnly = readOnly
         }
-        return transactionTemplate.execute { action() }!!
+        return transactionTemplate.execute { action() }
     }
 }
 

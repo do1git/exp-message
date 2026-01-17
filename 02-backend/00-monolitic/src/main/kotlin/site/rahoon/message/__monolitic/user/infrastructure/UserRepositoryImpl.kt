@@ -1,17 +1,21 @@
 package site.rahoon.message.__monolitic.user.infrastructure
 
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
+import site.rahoon.message.__monolitic.common.global.TransactionalRepository
 import site.rahoon.message.__monolitic.user.domain.User
 import site.rahoon.message.__monolitic.user.domain.UserRepository
+import java.time.LocalDateTime
 
 /**
  * UserRepository 인터페이스의 JPA 구현체
  */
-@Repository
+@TransactionalRepository
 class UserRepositoryImpl(
     private val jpaRepository: UserJpaRepository
 ) : UserRepository {
 
+    @Transactional
     override fun save(user: User): User {
         val entity = toEntity(user)
         val savedEntity = jpaRepository.save(entity)
@@ -30,8 +34,9 @@ class UserRepositoryImpl(
             .orElse(null)
     }
 
+    @Transactional
     override fun delete(id: String) {
-        jpaRepository.deleteById(id)
+        jpaRepository.softDeleteById(id, LocalDateTime.now())
     }
 
     private fun toEntity(user: User): UserEntity {

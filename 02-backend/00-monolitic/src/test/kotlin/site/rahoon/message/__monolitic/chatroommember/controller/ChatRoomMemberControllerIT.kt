@@ -69,7 +69,7 @@ class ChatRoomMemberControllerIT(
         val entity = HttpEntity<Nothing?>(null, headers)
 
         val response = restTemplate.exchange(
-            baseUrl(chatRoomId),
+            "${baseUrl(chatRoomId)}/me",
             HttpMethod.POST,
             entity,
             String::class.java
@@ -92,7 +92,7 @@ class ChatRoomMemberControllerIT(
 
         // when
         val response = restTemplate.exchange(
-            baseUrl(chatRoomId),
+            "${baseUrl(chatRoomId)}/me",
             HttpMethod.POST,
             entity,
             String::class.java
@@ -115,7 +115,7 @@ class ChatRoomMemberControllerIT(
 
         // when - 이미 생성자로 자동 참가되어 있으므로 다시 참가 시도
         val response = restTemplate.exchange(
-            baseUrl(chatRoomId),
+            "${baseUrl(chatRoomId)}/me",
             HttpMethod.POST,
             entity,
             String::class.java
@@ -134,7 +134,7 @@ class ChatRoomMemberControllerIT(
 
         // when
         val response = restTemplate.exchange(
-            baseUrl(nonExistentChatRoomId),
+            "${baseUrl(nonExistentChatRoomId)}/me",
             HttpMethod.POST,
             entity,
             String::class.java

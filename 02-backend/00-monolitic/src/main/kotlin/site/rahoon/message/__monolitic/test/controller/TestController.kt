@@ -1,10 +1,11 @@
-package site.rahoon.message.__monolitic.common.controller
+package site.rahoon.message.__monolitic.test.controller
 
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import site.rahoon.message.__monolitic.common.controller.CommonApiResponse
 import site.rahoon.message.__monolitic.common.domain.CommonError
 import site.rahoon.message.__monolitic.common.domain.DomainException
 
@@ -14,11 +15,11 @@ import site.rahoon.message.__monolitic.common.domain.DomainException
  */
 @RestController
 @RequestMapping("/test")
-class CommonTestController {
+class TestController {
 
-    private val logger = LoggerFactory.getLogger(CommonTestController::class.java)
+    private val logger = LoggerFactory.getLogger(TestController::class.java)
 
-    @GetMapping
+    @GetMapping("/health")
     fun health(): CommonApiResponse<Map<String, String>> {
         val data = mapOf(
             "status" to "ok",
@@ -45,4 +46,3 @@ class CommonTestController {
         )
     }
 }
-

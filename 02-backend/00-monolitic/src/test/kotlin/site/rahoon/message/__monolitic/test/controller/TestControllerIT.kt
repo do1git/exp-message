@@ -1,4 +1,4 @@
-package site.rahoon.message.__monolitic.common.controller
+package site.rahoon.message.__monolitic.test.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.matchers.shouldBe
@@ -16,7 +16,7 @@ import site.rahoon.message.__monolitic.common.test.assertSuccess
  * Test Controller E2E 테스트
  * 실제 HTTP 요청을 통해 전체 스택을 테스트합니다.
  */
-class CommonTestControllerIT(
+class TestControllerIT(
     private val restTemplate: TestRestTemplate,
     private val objectMapper: ObjectMapper,
     @LocalServerPort private var port: Int = 0
@@ -28,7 +28,7 @@ class CommonTestControllerIT(
     fun `health check 성공`() {
         // when
         val response = restTemplate.exchange(
-            baseUrl(),
+            "${baseUrl()}/health",
             HttpMethod.GET,
             null,
             String::class.java

@@ -67,7 +67,7 @@ class ChatRoomControllerIT(
         val entity = HttpEntity<Nothing?>(null, headers)
 
         val response = restTemplate.exchange(
-            "${baseUrl()}/$chatRoomId/members",
+            "${baseUrl()}/$chatRoomId/members/me",
             HttpMethod.POST,
             entity,
             String::class.java

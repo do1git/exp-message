@@ -1,10 +1,10 @@
 package site.rahoon.message.__monolitic.chatroom.infrastructure
 
-import org.springframework.data.jpa.repository.JpaRepository
+import site.rahoon.message.__monolitic.common.infrastructure.JpaSoftDeleteRepository
 
 /**
  * Spring Data JPA Repository
  */
-interface ChatRoomJpaRepository : JpaRepository<ChatRoomEntity, String> {
+interface ChatRoomJpaRepository : JpaSoftDeleteRepository<ChatRoomEntity, String> {
     fun findByCreatedByUserId(userId: String): List<ChatRoomEntity>
 }
