@@ -7,26 +7,26 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.test.context.ActiveProfiles
 import org.testcontainers.containers.MySQLContainer
 import org.testcontainers.junit.jupiter.Container
-import org.springframework.test.context.ActiveProfiles
 import org.testcontainers.junit.jupiter.Testcontainers
 
 @SpringBootTest
 @Testcontainers
 @ActiveProfiles("test")
 class FlywayMigrationTest {
-
     companion object {
         @Container
         @ServiceConnection
         @JvmStatic
-        val mysql: MySQLContainer<*> = MySQLContainer("mysql:8.0")
-            .withDatabaseName("test_db")
-            .withUsername("test_user")
-            .withPassword("test_password")
-            .withUrlParam("useSSL", "false")
-            .withUrlParam("allowPublicKeyRetrieval", "true")
+        val mysql: MySQLContainer<*> =
+            MySQLContainer("mysql:8.0")
+                .withDatabaseName("test_db")
+                .withUsername("test_user")
+                .withPassword("test_password")
+                .withUrlParam("useSSL", "false")
+                .withUrlParam("allowPublicKeyRetrieval", "true")
     }
 
     @Autowired
@@ -47,9 +47,10 @@ class FlywayMigrationTest {
         }
 
         // flyway_schema_history 테이블 존재 확인
-        val tables = jdbcTemplate.queryForList(
-            "SELECT table_name FROM information_schema.tables WHERE table_schema = 'test_db'"
-        )
+        val tables =
+            jdbcTemplate.queryForList(
+                "SELECT table_name FROM information_schema.tables WHERE table_schema = 'test_db'",
+            )
         println("=== Tables in DB ===")
         tables.forEach { println("  - ${it["table_name"]}") }
 
