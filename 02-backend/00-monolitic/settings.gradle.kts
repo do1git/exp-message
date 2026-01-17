@@ -1,1 +1,1 @@
-rootProject.name = "00-monolitic"
+rootProject.name = "monolitic"
