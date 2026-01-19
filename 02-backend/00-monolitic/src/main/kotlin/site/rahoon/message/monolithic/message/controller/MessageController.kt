@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import site.rahoon.message.monolithic.common.controller.AuthInfoAffect
 import site.rahoon.message.monolithic.common.controller.CommonApiResponse
 import site.rahoon.message.monolithic.common.controller.CommonAuthInfo
 import site.rahoon.message.monolithic.common.domain.CommonError
@@ -32,7 +31,6 @@ class MessageController(
      * POST /messages
      */
     @PostMapping
-    @AuthInfoAffect(required = true)
     @ResponseStatus(HttpStatus.CREATED)
     fun create(
         @Valid @RequestBody request: MessageRequest.Create,
@@ -50,7 +48,7 @@ class MessageController(
      * GET /messages/{id}
      */
     @GetMapping("/{id}")
-    @AuthInfoAffect(required = true)
+    @Suppress("UnusedParameter")
     fun getById(
         @PathVariable id: String,
         authInfo: CommonAuthInfo,
@@ -65,13 +63,13 @@ class MessageController(
      * 채팅방별 메시지 목록 조회
      * GET /messages?chatRoomId={chatRoomId}
      */
+    @Suppress("UnusedParameter")
     @GetMapping(params = ["chatRoomId"])
-    @AuthInfoAffect(required = true)
     fun getByChatRoomId(
         @RequestParam chatRoomId: String,
         @RequestParam(required = false) cursor: String?,
         @RequestParam(required = false) limit: Int?,
-        authInfo: CommonAuthInfo,
+        authInfo: CommonAuthInfo?,
     ): CommonApiResponse.Page<MessageResponse.Detail> {
         val appliedLimit =
             when {

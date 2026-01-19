@@ -12,6 +12,7 @@ import java.util.UUID
  * - Long: 1736900000123 → "1k2m3n4p" (약 30-40% 길이 감소)
  * - UUID: 36자 → 약 21-22자 (16바이트를 Base62로 인코딩)
  */
+@Suppress("MagicNumber")
 object Base62Encoding {
     private const val BASE62_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
     private const val BASE = 62L

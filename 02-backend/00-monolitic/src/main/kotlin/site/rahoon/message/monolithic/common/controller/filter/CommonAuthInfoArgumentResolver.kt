@@ -7,7 +7,6 @@ import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
-import site.rahoon.message.monolithic.common.controller.AuthInfoAffect
 import site.rahoon.message.monolithic.common.controller.CommonAuthInfo
 import site.rahoon.message.monolithic.common.domain.CommonError
 import site.rahoon.message.monolithic.common.domain.DomainException
@@ -32,14 +31,16 @@ class CommonAuthInfoArgumentResolver(
             return false
         }
 
-        // @AuthInfoAffect 어노테이션이 있는 경우에만 처리
-        // 메소드 레벨 또는 클래스 레벨 어노테이션 확인
-        val methodAnnotation = parameter.getMethodAnnotation(AuthInfoAffect::class.java)
-        val classAnnotation = parameter.containingClass.getAnnotation(AuthInfoAffect::class.java)
-
-        return methodAnnotation != null || classAnnotation != null
+//        // @AuthInfoAffect 어노테이션이 있는 경우에만 처리
+//        // 메소드 레벨 또는 클래스 레벨 어노테이션 확인
+//        val methodAnnotation = parameter.getMethodAnnotation(AuthInfoAffect::class.java)
+//        val classAnnotation = parameter.containingClass.getAnnotation(AuthInfoAffect::class.java)
+//
+//        return methodAnnotation != null || classAnnotation != null
+        return true
     }
 
+    @Suppress("ThrowsCount", "ReturnCount")
     override fun resolveArgument(
         parameter: MethodParameter,
         mavContainer: ModelAndViewContainer?,
@@ -52,15 +53,15 @@ class CommonAuthInfoArgumentResolver(
 
         // @AuthInfoAffect 어노테이션 확인 (메소드 또는 클래스 레벨)
         // supportsParameter에서 이미 어노테이션 존재 여부를 확인했으므로, 여기서는 반드시 존재함
-        val methodAnnotation = parameter.getMethodAnnotation(AuthInfoAffect::class.java)
-        val classAnnotation = parameter.containingClass.getAnnotation(AuthInfoAffect::class.java)
-
+//        val methodAnnotation = parameter.getMethodAnnotation(AuthInfoAffect::class.java)
+//        val classAnnotation = parameter.containingClass.getAnnotation(AuthInfoAffect::class.java)
         // 메소드 레벨 어노테이션이 있으면 우선, 없으면 클래스 레벨 어노테이션 사용
-        val annotation =
-            methodAnnotation ?: classAnnotation
-                ?: throw IllegalStateException("@AuthInfoAffect 어노테이션이 없습니다. supportsParameter에서 체크해야 합니다.")
+//        val annotation =
+//            methodAnnotation ?: classAnnotation
+//                ?: throw IllegalStateException("@AuthInfoAffect 어노테이션이 없습니다. supportsParameter에서 체크해야 합니다.")
+//        val required = annotation.required
 
-        val required = annotation.required
+        val required = !(parameter.isOptional)
 
         // Authorization 헤더에서 토큰 추출
         val authHeader = request.getHeader("Authorization")

@@ -1,4 +1,4 @@
-package site.rahoon.message.monolithic.authtoken.domain
+package site.rahoon.message.monolithic.authtoken.domain.component
 
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.IncorrectClaimException
@@ -7,6 +7,9 @@ import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SecurityException
 import org.springframework.stereotype.Component
+import site.rahoon.message.monolithic.authtoken.domain.AccessToken
+import site.rahoon.message.monolithic.authtoken.domain.AuthTokenError
+import site.rahoon.message.monolithic.authtoken.domain.AuthTokenProperties
 import site.rahoon.message.monolithic.common.domain.DomainException
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -29,6 +32,7 @@ class AccessTokenVerifier(
      * @return AccessToken (검증된 토큰 정보)
      * @throws DomainException 토큰이 유효하지 않거나 만료된 경우
      */
+    @Suppress("ThrowsCount")
     fun verify(token: String): AccessToken {
         // Bearer 접두사 제거
         val cleanToken = token.trim().removePrefix("Bearer ").removePrefix("bearer ")
@@ -64,20 +68,19 @@ class AccessTokenVerifier(
                 sessionId = sessionId,
             )
         } catch (e: ExpiredJwtException) {
-            throw DomainException(AuthTokenError.TOKEN_EXPIRED)
+            throw DomainException(AuthTokenError.TOKEN_EXPIRED, details = mapOf("token" to cleanToken), cause = e)
         } catch (e: MalformedJwtException) {
-            throw DomainException(AuthTokenError.INVALID_TOKEN)
+            throw DomainException(AuthTokenError.INVALID_TOKEN, details = mapOf("token" to cleanToken), cause = e)
         } catch (e: IncorrectClaimException) {
             throw DomainException(
                 error = AuthTokenError.INVALID_TOKEN,
-                details = mapOf("message" to (e.message ?: "Invalid claim")),
+                details = mapOf("token" to cleanToken, "message" to (e.message ?: "Invalid claim")),
+                cause = e,
             )
         } catch (e: SecurityException) {
-            throw DomainException(AuthTokenError.INVALID_TOKEN)
+            throw DomainException(AuthTokenError.INVALID_TOKEN, details = mapOf("token" to cleanToken), cause = e)
         } catch (e: IllegalArgumentException) {
-            throw DomainException(AuthTokenError.INVALID_TOKEN)
-        } catch (e: DomainException) {
-            throw e
+            throw DomainException(AuthTokenError.INVALID_TOKEN, details = mapOf("token" to cleanToken), cause = e)
         }
     }
 }

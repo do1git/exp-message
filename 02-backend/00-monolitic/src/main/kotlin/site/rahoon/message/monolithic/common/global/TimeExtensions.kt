@@ -15,11 +15,13 @@ fun Long.toLocalDateTime(zoneId: ZoneId): LocalDateTime = Instant.ofEpochMilli(t
  * LocalDateTime <-> epoch micros 변환 확장 함수
  * DB DATETIME(6) 정밀도와 일치
  */
+@Suppress("MagicNumber")
 fun LocalDateTime.toEpochMicroLong(zoneId: ZoneId): Long {
     val instant = this.atZone(zoneId).toInstant()
     return instant.epochSecond * 1_000_000L + instant.nano / 1_000
 }
 
+@Suppress("MagicNumber")
 fun Long.toLocalDateTimeFromMicros(zoneId: ZoneId): LocalDateTime {
     val seconds = this / 1_000_000L
     val nanos = (this % 1_000_000L) * 1_000L

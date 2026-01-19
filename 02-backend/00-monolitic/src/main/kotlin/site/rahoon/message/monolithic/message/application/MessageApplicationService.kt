@@ -31,6 +31,7 @@ class MessageApplicationService(
      * 메시지 전송
      * 채팅방 멤버만 메시지를 전송할 수 있습니다.
      */
+    @Suppress("ThrowsCount")
     fun create(criteria: MessageCriteria.Create): Message {
         // 채팅방 존재 여부 확인
         try {

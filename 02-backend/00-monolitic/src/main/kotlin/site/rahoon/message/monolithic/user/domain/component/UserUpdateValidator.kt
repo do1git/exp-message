@@ -24,6 +24,11 @@ interface UserUpdateValidator {
  */
 @Component
 class UserUpdateValidatorImpl : UserUpdateValidator {
+    companion object {
+        private const val NICKNAME_MIN_LENGTH = 2
+        private const val NICKNAME_MAX_LENGTH = 20
+    }
+
     override fun validate(command: UserCommand.Update) {
         validateId(command.id)
         validateNickname(command.nickname)
@@ -46,7 +51,7 @@ class UserUpdateValidatorImpl : UserUpdateValidator {
             )
         }
 
-        if (nickname.length < 2 || nickname.length > 20) {
+        if (nickname.length !in NICKNAME_MIN_LENGTH..NICKNAME_MAX_LENGTH) {
             throw DomainException(
                 error = UserError.INVALID_NICKNAME,
                 details =

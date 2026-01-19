@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import site.rahoon.message.monolithic.authtoken.domain.AccessTokenVerifier
 import site.rahoon.message.monolithic.authtoken.domain.AuthTokenProperties
 import site.rahoon.message.monolithic.common.domain.DomainException
 import java.time.Instant

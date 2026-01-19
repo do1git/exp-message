@@ -1,5 +1,6 @@
 package site.rahoon.message.monolithic.authtoken.infrastructure
 
+import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.data.redis.core.RedisTemplate
@@ -32,7 +33,11 @@ class AuthTokenRepositoryImpl(
         // 1. RefreshToken 데이터 생성
         val refreshTokenJson = objectMapper.writeValueAsString(refreshToken)
         val refreshTokenTtlSecond = Duration.between(now, refreshToken.expiresAt).seconds
-        val refreshTokenTtl = if (refreshTokenTtlSecond > 0) Duration.ofSeconds(refreshTokenTtlSecond) else Duration.ZERO
+        val refreshTokenTtl = if (refreshTokenTtlSecond > 0) {
+            Duration.ofSeconds(refreshTokenTtlSecond)
+        } else {
+            Duration.ZERO
+        }
 
         // 2. byTokenKey에 RefreshToken 데이터 저장
         redisTemplate.opsForValue().set(byTokenKey, refreshTokenJson, refreshTokenTtl)
@@ -46,19 +51,7 @@ class AuthTokenRepositoryImpl(
     override fun findRefreshToken(refreshToken: String): RefreshToken? {
         val tokenKey = "$REFRESH_TOKEN_PREFIX$refreshToken"
         val json = redisTemplate.opsForValue().get(tokenKey) ?: return null
-
-        return try {
-            objectMapper.readValue(json, RefreshToken::class.java)
-        } catch (e: Exception) {
-            logger.error(
-                "Failed to parse RefreshToken from Redis. tokenKey: $tokenKey, json: $json",
-                e,
-            )
-            throw IllegalStateException(
-                "RefreshToken 데이터 파싱 실패: Redis에 저장된 데이터가 손상되었거나 형식이 맞지 않습니다. tokenKey=$tokenKey",
-                e,
-            )
-        }
+        return objectMapper.readValue(json, RefreshToken::class.java)
     }
 
     override fun deleteRefreshToken(refreshToken: String) {
@@ -71,7 +64,7 @@ class AuthTokenRepositoryImpl(
                 try {
                     val token = objectMapper.readValue(json, RefreshToken::class.java)
                     "$SESSION_REFRESH_TOKEN_PREFIX${token.sessionId}"
-                } catch (e: Exception) {
+                } catch (e: JsonProcessingException) {
                     logger.error(
                         "Failed to parse RefreshToken from Redis during deletion. tokenKey: $tokenKey, json: $json",
                         e,

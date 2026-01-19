@@ -47,6 +47,8 @@ open class CommonPageCursor(
     private var cursorMap: Map<String, String>? = null,
 ) {
     companion object {
+        private const val SIGNATURE_LENGTH = 16
+
         /**
          * Cursor 서명을 위한 설정 (선택적)
          * null이면 서명을 사용하지 않음
@@ -96,7 +98,7 @@ open class CommonPageCursor(
             mac.init(secretKey)
             val hash = mac.doFinal(payload.toByteArray(StandardCharsets.UTF_8))
             // 길이 최소화: 처음 16바이트만 사용 (128비트 보안)
-            val truncated = hash.sliceArray(0 until 16)
+            val truncated = hash.sliceArray(0 until SIGNATURE_LENGTH)
             // Base62 인코딩으로 변환 (Base64 대신)
             return site.rahoon.message.monolithic.common.global.Base62Encoding
                 .encodeBytes(truncated)
@@ -122,12 +124,13 @@ open class CommonPageCursor(
             cursors: List<Pair<String, String>>,
         ): String = CommonPageCursor(version, cursors).encode()
 
+        @Suppress("ThrowsCount", "ReturnCount", "LongMethod", "CyclomaticComplexMethod")
         fun decode(cursor: String): CommonPageCursor {
             val payload =
                 try {
                     val decoded = Base64.getUrlDecoder().decode(cursor)
                     String(decoded, StandardCharsets.UTF_8)
-                } catch (e: Exception) {
+                } catch (e: IllegalArgumentException) {
                     throw DomainException(
                         error = CommonError.INVALID_PAGE_CURSOR,
                         details = mapOf("cursor" to cursor, "reason" to "base64url decode failed"),

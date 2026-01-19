@@ -1,8 +1,8 @@
 package site.rahoon.message.monolithic.authtoken.infrastructure
 
 import org.springframework.stereotype.Component
-import site.rahoon.message.monolithic.authtoken.domain.AccessTokenVerifier
 import site.rahoon.message.monolithic.authtoken.domain.AuthTokenError
+import site.rahoon.message.monolithic.authtoken.domain.component.AccessTokenVerifier
 import site.rahoon.message.monolithic.common.controller.CommonAuthInfo
 import site.rahoon.message.monolithic.common.controller.filter.AuthTokenResolver
 import site.rahoon.message.monolithic.common.domain.CommonError
@@ -35,9 +35,9 @@ class AuthTokenResolverImpl(
                 userId = accessToken.userId,
                 sessionId = accessToken.sessionId,
             )
-        } catch (e: Exception) {
+        } catch (e: DomainException) {
             // AuthTokenError
-            if (e is DomainException && e.error is AuthTokenError) {
+            if (e.error is AuthTokenError) {
                 val errorType: CommonError =
                     when (e.error) {
                         AuthTokenError.TOKEN_EXPIRED,
@@ -53,13 +53,10 @@ class AuthTokenResolverImpl(
             }
             // 그외 도메인 에러
             // 이미 CommonError이거나 다른 도메인 에러인 경우 SERVER_ERROR 처리
-            if (e is DomainException) {
-                throw DomainException(
-                    error = CommonError.SERVER_ERROR,
-                    details = e.details,
-                    cause = e,
-                )
-            }
-            throw e
+            throw DomainException(
+                error = CommonError.SERVER_ERROR,
+                details = e.details,
+                cause = e,
+            )
         }
 }

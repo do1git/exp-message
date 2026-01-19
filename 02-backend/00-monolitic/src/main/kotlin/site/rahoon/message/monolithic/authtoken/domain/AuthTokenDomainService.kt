@@ -2,6 +2,7 @@ package site.rahoon.message.monolithic.authtoken.domain
 
 import org.springframework.stereotype.Service
 import site.rahoon.message.monolithic.authtoken.domain.component.AccessTokenIssuer
+import site.rahoon.message.monolithic.authtoken.domain.component.AccessTokenVerifier
 import site.rahoon.message.monolithic.authtoken.domain.component.RefreshTokenIssuer
 import site.rahoon.message.monolithic.common.domain.DomainException
 import java.util.UUID

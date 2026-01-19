@@ -173,6 +173,7 @@ class LoginFailureControllerIT(
     /**
      * 응답 body에서 에러 코드를 추출합니다.
      */
+    @Suppress("SwallowedException")
     private fun extractErrorCode(responseBody: String?): String? {
         if (responseBody == null) return "UNKNOWN"
         return try {

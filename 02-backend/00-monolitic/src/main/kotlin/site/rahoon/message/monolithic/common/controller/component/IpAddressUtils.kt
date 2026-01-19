@@ -13,6 +13,7 @@ object IpAddressUtils {
      * @param request HttpServletRequest
      * @return 클라이언트 IP 주소
      */
+    @Suppress("ReturnCount")
     fun getClientIpAddress(request: HttpServletRequest): String {
         // X-Forwarded-For 헤더 확인 (프록시/로드밸런서 뒤에서 사용)
         val xForwardedFor = request.getHeader("X-Forwarded-For")

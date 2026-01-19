@@ -51,13 +51,8 @@ class JpaConfig {
             }
 
             private fun enableSoftDeleteFilter(entityManager: EntityManager) {
-                try {
-                    val session = entityManager.unwrap(org.hibernate.Session::class.java)
-                    session.enableFilter("softDeleteFilter")
-                } catch (e: Exception) {
-                    // Hibernate Session을 unwrap할 수 없는 경우 무시
-                    // (예: 다른 JPA 구현체를 사용하는 경우)
-                }
+                val session = entityManager.unwrap(org.hibernate.Session::class.java)
+                session.enableFilter("softDeleteFilter")
             }
         }
     }

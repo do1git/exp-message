@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.method.HandlerMethod
-import site.rahoon.message.monolithic.common.controller.AuthInfoAffect
 import site.rahoon.message.monolithic.common.controller.CommonAuthInfo
 
 /**
@@ -25,6 +24,9 @@ class OpenApiConfig {
     private var swaggerHost: String = ""
 
     // 전역 무시 설정 제거 - @AuthInfoAffect가 있는 경우에만 OperationCustomizer에서 처리
+    companion object {
+        private const val SWAGGER_ORDER_DEFAULT = 1000
+    }
 
     @Bean
     fun openAPI(): OpenAPI =
@@ -106,11 +108,12 @@ class OpenApiConfig {
      * 2) 정규화된 태그명을 기준으로 override(태그명/description)를 적용한다.
      */
     @Bean
+    @Suppress("MagicNumber", "LongMethod")
     fun swaggerTagAliasCustomizer(): OpenApiCustomizer {
         data class TagOverride(
             val name: String,
             val description: String? = null,
-            val order: Int = 1000,
+            val order: Int = SWAGGER_ORDER_DEFAULT,
         )
 
         /**
@@ -204,7 +207,7 @@ class OpenApiConfig {
                                     existingTag
                                 }
 
-                            val order = override?.order ?: existingMeta?.order ?: 1000
+                            val order = override?.order ?: existingMeta?.order ?: SWAGGER_ORDER_DEFAULT
                             val mergedOrder = minOf(existingMeta?.order ?: order, order)
 
                             resolvedTags[finalName] = ResolvedTagMeta(tag = withDescription, order = mergedOrder)
@@ -233,52 +236,34 @@ class OpenApiConfig {
     fun authInfoAffectOperationCustomizer(): OperationCustomizer {
         return OperationCustomizer { operation, handlerMethod ->
             val handlerMethodObj = handlerMethod as? HandlerMethod ?: return@OperationCustomizer operation
-            val method = handlerMethodObj.method
 
-            val hasAuthInfoAffect =
-                method.isAnnotationPresent(AuthInfoAffect::class.java) ||
-                    method.declaringClass.isAnnotationPresent(AuthInfoAffect::class.java)
+//            val method = handlerMethodObj.method
+//            val hasAuthInfoAffect =
+//                method.isAnnotationPresent(AuthInfoAffect::class.java) ||
+//                    method.declaringClass.isAnnotationPresent(AuthInfoAffect::class.java)
+//            if (!hasAuthInfoAffect) return@OperationCustomizer operation
 
-            if (!hasAuthInfoAffect) return@OperationCustomizer operation
-
-            // Security 추가
-            operation.addSecurityItem(SecurityRequirement().addList("bearerAuth"))
-
-            // AuthInfo 타입의 파라미터 제거
             val parameters = operation.parameters ?: return@OperationCustomizer operation
             if (parameters.isEmpty()) return@OperationCustomizer operation
 
+            // AuthInfo 타입의 파라미터 제거
+            // authInfo 파라미터 제거 (이름 기반 + 이름이 없는 경우 삭제)
             val methodParameters = handlerMethodObj.methodParameters
-
-            val authInfoMethodParams =
-                methodParameters
-                    .asSequence()
-                    .filter { methodParam ->
-                        methodParam.parameterType == CommonAuthInfo::class.java ||
-                            methodParam.parameterType == CommonAuthInfo::class.javaObjectType
-                    }.toList()
-
-            // 1) 파라미터 "이름"을 얻을 수 있으면: 이름 기반으로 Swagger 파라미터 제거
-            val authInfoParamNames =
-                authInfoMethodParams
-                    .asSequence()
-                    .mapNotNull { it.parameterName }
-                    .toSet()
-
-            /**
-             * Kotlin/Gradle 설정에 따라 `MethodParameter.parameterName`이 null일 수 있음.
-             *
-             * 이때 "인덱스 기반 제거"는 requestBody 파라미터가 끼어있는 메소드에서 인덱스가 어긋나
-             * (Swagger parameters는 body를 포함하지 않음) AuthInfo가 누락 제거되는 케이스가 생긴다.
-             *
-             * 그래서 이름을 못 얻으면, 컨벤션(대부분 `authInfo`)으로 제거한다.
-             */
+            val authInfoMethodParams = methodParameters
+                .asSequence()
+                .filter { methodParam ->
+                    methodParam.parameterType == CommonAuthInfo::class.java ||
+                        methodParam.parameterType == CommonAuthInfo::class.javaObjectType
+                }.toList()
+            val authInfoParamNames = authInfoMethodParams.asSequence().mapNotNull { it.parameterName }.toSet()
             val swaggerParamNamesToRemove = authInfoParamNames.ifEmpty { setOf("authInfo") }
             val filteredParameters = parameters.filterNot { it.name in swaggerParamNamesToRemove }
-
             operation.parameters = filteredParameters
 
-            // AuthInfo 타입의 Body 제거
+            // 파라미터 개수가 변경되었으면 Security 추가
+            if (filteredParameters.size != parameters.size) {
+                operation.addSecurityItem(SecurityRequirement().addList("bearerAuth"))
+            }
             operation
         }
     }

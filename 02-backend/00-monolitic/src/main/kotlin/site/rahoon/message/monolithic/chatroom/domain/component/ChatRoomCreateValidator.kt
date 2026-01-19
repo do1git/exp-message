@@ -24,6 +24,11 @@ interface ChatRoomCreateValidator {
  */
 @Component
 class ChatRoomCreateValidatorImpl : ChatRoomCreateValidator {
+    companion object {
+        private const val NAME_MIN_LENGTH = 1
+        private const val NAME_MAX_LENGTH = 100
+    }
+
     override fun validate(command: ChatRoomCommand.Create) {
         validateName(command.name)
         validateCreatedByUserId(command.createdByUserId)
@@ -37,7 +42,7 @@ class ChatRoomCreateValidatorImpl : ChatRoomCreateValidator {
             )
         }
 
-        if (name.length < 1 || name.length > 100) {
+        if (name.length < NAME_MIN_LENGTH || name.length > NAME_MAX_LENGTH) {
             throw DomainException(
                 error = ChatRoomError.INVALID_NAME,
                 details =

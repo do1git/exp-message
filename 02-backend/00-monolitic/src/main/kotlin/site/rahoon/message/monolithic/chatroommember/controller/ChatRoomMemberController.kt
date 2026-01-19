@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import site.rahoon.message.monolithic.chatroommember.application.ChatRoomMemberApplicationService
-import site.rahoon.message.monolithic.common.controller.AuthInfoAffect
 import site.rahoon.message.monolithic.common.controller.CommonApiResponse
 import site.rahoon.message.monolithic.common.controller.CommonAuthInfo
 
@@ -27,7 +26,6 @@ class ChatRoomMemberController(
      * POST /chat-rooms/{chatRoomId}/members
      */
     @PostMapping("/me")
-    @AuthInfoAffect(required = true)
     @ResponseStatus(HttpStatus.CREATED)
     fun join(
         @PathVariable chatRoomId: String,
@@ -45,7 +43,6 @@ class ChatRoomMemberController(
      * DELETE /chat-rooms/{chatRoomId}/members/me
      */
     @DeleteMapping("/me")
-    @AuthInfoAffect(required = true)
     fun leave(
         @PathVariable chatRoomId: String,
         authInfo: CommonAuthInfo,
@@ -62,14 +59,11 @@ class ChatRoomMemberController(
      * GET /chat-rooms/{chatRoomId}/members
      */
     @GetMapping
-    @AuthInfoAffect(required = true)
     fun getMembers(
         @PathVariable chatRoomId: String,
-        authInfo: CommonAuthInfo,
     ): CommonApiResponse<List<ChatRoomMemberResponse.ListItem>> {
         val memberInfoList = chatRoomMemberApplicationService.getByChatRoomId(chatRoomId)
         val response = memberInfoList.map { ChatRoomMemberResponse.ListItem.from(it) }
-
         return CommonApiResponse.success(response)
     }
 }

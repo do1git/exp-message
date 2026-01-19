@@ -24,6 +24,11 @@ interface ChatRoomUpdateValidator {
  */
 @Component
 class ChatRoomUpdateValidatorImpl : ChatRoomUpdateValidator {
+    companion object {
+        private const val NAME_MIN_LENGTH = 1
+        private const val NAME_MAX_LENGTH = 100
+    }
+
     override fun validate(command: ChatRoomCommand.Update) {
         validateName(command.name)
     }
@@ -36,7 +41,7 @@ class ChatRoomUpdateValidatorImpl : ChatRoomUpdateValidator {
             )
         }
 
-        if (name.length < 1 || name.length > 100) {
+        if (name.length < NAME_MIN_LENGTH || name.length > NAME_MAX_LENGTH) {
             throw DomainException(
                 error = ChatRoomError.INVALID_NAME,
                 details =

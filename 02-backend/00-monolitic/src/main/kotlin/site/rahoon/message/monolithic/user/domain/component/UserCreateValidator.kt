@@ -56,7 +56,8 @@ class UserCreateValidatorImpl : UserCreateValidator {
             )
         }
 
-        if (password.length < 8) {
+        @Suppress("MagicNumber")
+        if (password.length !in 8..20) {
             throw DomainException(
                 error = UserError.INVALID_PASSWORD,
                 details = mapOf("reason" to "비밀번호는 최소 8자 이상이어야 합니다"),
@@ -72,7 +73,8 @@ class UserCreateValidatorImpl : UserCreateValidator {
             )
         }
 
-        if (nickname.length < 2 || nickname.length > 20) {
+        @Suppress("MagicNumber")
+        if (nickname.length !in 2..20) {
             throw DomainException(
                 error = UserError.INVALID_NICKNAME,
                 details =

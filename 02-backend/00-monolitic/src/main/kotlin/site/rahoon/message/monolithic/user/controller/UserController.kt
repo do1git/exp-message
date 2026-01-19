@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import site.rahoon.message.monolithic.common.controller.AuthInfoAffect
 import site.rahoon.message.monolithic.common.controller.CommonApiResponse
 import site.rahoon.message.monolithic.common.controller.CommonAuthInfo
 import site.rahoon.message.monolithic.user.application.UserApplicationService
@@ -43,11 +42,9 @@ class UserController(
      * GET /users/me
      */
     @GetMapping("/me")
-    @AuthInfoAffect(required = true)
     fun getCurrentUser(authInfo: CommonAuthInfo): CommonApiResponse<UserResponse.Me> {
         val userInfo = userApplicationService.getCurrentUser(authInfo.userId)
         val response = UserResponse.Me.from(userInfo)
-
         return CommonApiResponse.success(response)
     }
 }

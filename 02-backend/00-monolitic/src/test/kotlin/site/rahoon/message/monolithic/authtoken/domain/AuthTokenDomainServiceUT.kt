@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import site.rahoon.message.monolithic.authtoken.domain.component.AccessTokenIssuer
+import site.rahoon.message.monolithic.authtoken.domain.component.AccessTokenVerifier
 import site.rahoon.message.monolithic.authtoken.domain.component.RefreshTokenIssuer
 import site.rahoon.message.monolithic.common.domain.DomainException
 import java.time.LocalDateTime

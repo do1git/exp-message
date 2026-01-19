@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import site.rahoon.message.monolithic.chatroom.application.ChatRoomApplicationService
 import site.rahoon.message.monolithic.chatroom.application.ChatRoomCriteria
-import site.rahoon.message.monolithic.common.controller.AuthInfoAffect
 import site.rahoon.message.monolithic.common.controller.CommonApiResponse
 import site.rahoon.message.monolithic.common.controller.CommonAuthInfo
 
@@ -31,7 +30,6 @@ class ChatRoomController(
      * POST /chat-rooms
      */
     @PostMapping
-    @AuthInfoAffect(required = true)
     @ResponseStatus(HttpStatus.CREATED)
     fun create(
         @Valid @RequestBody request: ChatRoomRequest.Create,
@@ -49,14 +47,11 @@ class ChatRoomController(
      * GET /chat-rooms/{id}
      */
     @GetMapping("/{id}")
-    @AuthInfoAffect(required = true)
     fun getById(
         @PathVariable id: String,
-        authInfo: CommonAuthInfo,
     ): CommonApiResponse<ChatRoomResponse.Detail> {
         val chatRoomInfo = chatRoomApplicationService.getById(id)
         val response = ChatRoomResponse.Detail.from(chatRoomInfo)
-
         return CommonApiResponse.success(response)
     }
 
@@ -65,7 +60,6 @@ class ChatRoomController(
      * GET /chat-rooms
      */
     @GetMapping
-    @AuthInfoAffect(required = true)
     fun getMyChatRooms(authInfo: CommonAuthInfo): CommonApiResponse<List<ChatRoomResponse.ListItem>> {
         val chatRoomInfoList = chatRoomApplicationService.getByMemberUserId(authInfo.userId)
         val response = chatRoomInfoList.map { ChatRoomResponse.ListItem.from(it) }
@@ -78,7 +72,6 @@ class ChatRoomController(
      * PUT /chat-rooms/{id}
      */
     @PutMapping("/{id}")
-    @AuthInfoAffect(required = true)
     fun update(
         @PathVariable id: String,
         @Valid @RequestBody request: ChatRoomRequest.Update,
@@ -96,7 +89,6 @@ class ChatRoomController(
      * DELETE /chat-rooms/{id}
      */
     @DeleteMapping("/{id}")
-    @AuthInfoAffect(required = true)
     fun delete(
         @PathVariable id: String,
         authInfo: CommonAuthInfo,

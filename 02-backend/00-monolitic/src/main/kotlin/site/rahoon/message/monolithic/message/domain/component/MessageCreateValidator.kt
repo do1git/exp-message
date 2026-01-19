@@ -38,7 +38,8 @@ class MessageCreateValidatorImpl : MessageCreateValidator {
             )
         }
 
-        if (content.length > 10000) {
+        @Suppress("MagicNumber")
+        if (content.length !in 1..10000) {
             throw DomainException(
                 error = MessageError.INVALID_CONTENT,
                 details =

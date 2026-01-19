@@ -5,6 +5,7 @@ import site.rahoon.message.monolithic.common.test.IntegrationTestBase
 
 class ApplicationIT : IntegrationTestBase() {
     @Test
+    @Suppress("EmptyFunctionBlock")
     fun contextLoads() {
     }
 }

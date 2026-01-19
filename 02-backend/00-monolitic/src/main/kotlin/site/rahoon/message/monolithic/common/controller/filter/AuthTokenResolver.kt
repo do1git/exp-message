@@ -13,7 +13,7 @@ interface AuthTokenResolver {
      *
      * @param token JWT 토큰 문자열 (Bearer 접두사가 있으면 자동으로 제거됨)
      * @return AuthInfo (검증된 사용자 정보)
-     * @throws site.rahoon.message.monolithic.common.domain.DomainException CommonError에 해당하는 DomainException을 던집니다. 토큰이 유효하지 않거나 만료된 경우
+     * @throws DomainException 토큰이 유효하지 않거나 만료된 경우
      */
     fun verify(token: String): CommonAuthInfo
 }
