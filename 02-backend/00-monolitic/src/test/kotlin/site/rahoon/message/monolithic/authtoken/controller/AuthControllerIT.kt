@@ -30,7 +30,7 @@ class AuthControllerIT(
     private val authApplicationITUtils: AuthApplicationITUtils,
     @LocalServerPort private var port: Int = 0,
 ) : IntegrationTestBase() {
-    private val logger = KotlinLogging.logger {}
+    override val logger = KotlinLogging.logger {}
 
     private fun authBaseUrl(): String = "http://localhost:$port/auth"
 

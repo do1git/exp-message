@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket STOMP 테스트</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 상단: 프로젝트 설명 -->
+        <header id="projectInfo">
+            <h1 id="projectTitle">🔌 WebSocket STOMP 테스트</h1>
+            <p id="projectDescription">AsyncAPI 문서를 기반으로 WebSocket 통신을 테스트합니다</p>
+            <div id="projectVersion" class="project-meta"></div>
+        </header>
+
+        <!-- 메인 컨텐츠: 좌우 분할 -->
+        <div class="main-content">
+            <!-- 좌측: 연결 설정 및 메시지 -->
+            <div class="left-panel">
+                <div class="config-section compact">
+                    <!-- AsyncAPI URL 입력 부분 주석 처리
+                    <div class="config-header">
+                        <div class="form-group-inline" style="flex: 1;">
+                            <label for="asyncApiUrl">AsyncAPI URL:</label>
+                            <input type="text" id="asyncApiUrl" placeholder="http://localhost:8080 또는 http://127.0.0.1/api">
+                        </div>
+                        <div class="button-group-inline">
+                            <button id="loadApiBtn" class="btn btn-secondary btn-small">로드</button>
+                        </div>
+                    </div>
+                    -->
+                    <div class="config-header">
+                        <div id="connectionStatus" class="status-indicator-inline">
+                            <span class="status-dot disconnected"></span>
+                            <span>연결 안 됨</span>
+                        </div>
+                        <div class="form-group-inline token-input-group">
+                            <label for="accessToken">Token:</label>
+                            <input type="text" id="accessToken" placeholder="JWT 토큰">
+                        </div>
+                        <div class="button-group-inline">
+                            <button id="connectBtn" class="btn btn-primary btn-small">연결</button>
+                            <button id="disconnectBtn" class="btn btn-danger btn-small" disabled>해제</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dropdown-section" id="channels-section">
+                    <div class="dropdown-header" onclick="toggleDropdown('channels')">
+                        <h2>채널(구독)목록</h2>
+                        <span class="dropdown-icon" id="channels-icon">▼</span>
+                    </div>
+                    <div class="dropdown-content" id="channels-content">
+                        <div id="channelsList" class="channels-list">
+                            <p class="loading">AsyncAPI 문서를 불러오는 중...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dropdown-section messages-section" id="messages-section">
+                    <div class="dropdown-header" onclick="toggleDropdown('messages')">
+                        <h2>수신된 메시지</h2>
+                        <div class="dropdown-header-actions">
+                            <button id="clearMessagesBtn" class="btn btn-secondary btn-small" onclick="event.stopPropagation(); clearMessages();">지우기</button>
+                            <span class="dropdown-icon" id="messages-icon">▼</span>
+                        </div>
+                    </div>
+                    <div class="dropdown-content" id="messages-content">
+                        <div id="messagesList" class="messages-list">
+                            <p class="empty">수신된 메시지가 없습니다</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 우측: AsyncAPI 문서 -->
+            <div class="right-panel">
+                <div class="docs-section">
+                    <div id="asyncApiDocs" class="asyncapi-docs">
+                        <p class="loading">AsyncAPI 문서를 불러오는 중...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

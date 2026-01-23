@@ -69,7 +69,7 @@ class MessageController(
         @RequestParam chatRoomId: String,
         @RequestParam(required = false) cursor: String?,
         @RequestParam(required = false) limit: Int?,
-        authInfo: CommonAuthInfo?,
+        authInfo: CommonAuthInfo,
     ): CommonApiResponse.Page<MessageResponse.Detail> {
         val appliedLimit =
             when {

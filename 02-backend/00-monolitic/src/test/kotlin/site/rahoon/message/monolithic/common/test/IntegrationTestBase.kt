@@ -1,6 +1,7 @@
 package site.rahoon.message.monolithic.common.test
 
 import com.redis.testcontainers.RedisContainer
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
@@ -28,6 +29,8 @@ import java.time.Duration
  */
 @IntegrationTest
 abstract class IntegrationTestBase {
+    protected val logger = KotlinLogging.logger { }
+
     /**
      * 테스트마다 고유한 이메일을 생성합니다.
      */
@@ -75,6 +78,7 @@ abstract class IntegrationTestBase {
             registry.add("spring.datasource.password") { mysql.password }
             registry.add("spring.datasource.driver-class-name") { "com.mysql.cj.jdbc.Driver" }
             registry.add("spring.jpa.database-platform") { "org.hibernate.dialect.MySQLDialect" }
+            registry.add("decorator.datasource.p6spy.enable-logging") { true }
 
             // Redis
             registry.add("spring.data.redis.host") { redis.host }

@@ -64,7 +64,7 @@ service:
 healthCheck:
   liveness:
     httpGet:
-      path: /actuator/health
+      path: /actuator/health/liveness
       port: 8080
     initialDelaySeconds: 60
     periodSeconds: 30
@@ -72,7 +72,7 @@ healthCheck:
     failureThreshold: 3
   readiness:
     httpGet:
-      path: /actuator/health
+      path: /actuator/health/readiness
       port: 8080
     initialDelaySeconds: 30
     periodSeconds: 10
@@ -81,6 +81,12 @@ healthCheck:
 
 # Deployment Configuration
 replicas: 1
+terminationGracePeriodSeconds: 30  # Must be > Spring timeout-per-shutdown-phase (20s)
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1          # Add 1 new pod at a time
+    maxUnavailable: 0    # Keep existing pods until new ones are ready (zero downtime)
 
 # Namespace
 namespace: default

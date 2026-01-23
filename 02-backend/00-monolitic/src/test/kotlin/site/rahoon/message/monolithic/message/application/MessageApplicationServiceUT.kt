@@ -28,6 +28,7 @@ class MessageApplicationServiceUT {
     private lateinit var messageDomainService: MessageDomainService
     private lateinit var chatRoomDomainService: ChatRoomDomainService
     private lateinit var chatRoomMemberApplicationService: ChatRoomMemberApplicationService
+    private lateinit var messageEventPublisher: MessageEventPublisher
     private lateinit var messageApplicationService: MessageApplicationService
 
     @BeforeEach
@@ -35,11 +36,13 @@ class MessageApplicationServiceUT {
         messageDomainService = mockk()
         chatRoomDomainService = mockk()
         chatRoomMemberApplicationService = mockk()
+        messageEventPublisher = mockk<MessageEventPublisher>(relaxed = true)
         messageApplicationService =
             MessageApplicationService(
                 messageDomainService,
                 chatRoomDomainService,
                 chatRoomMemberApplicationService,
+                messageEventPublisher,
                 ZoneId.systemDefault(),
             )
     }
@@ -93,6 +96,13 @@ class MessageApplicationServiceUT {
         verify { chatRoomDomainService.getById(chatRoomId) }
         verify { chatRoomMemberApplicationService.isMember(chatRoomId, userId) }
         verify { messageDomainService.create(any()) }
+        verify {
+            messageEventPublisher.publishCreated(
+                match<MessageEvent.Created> {
+                    it.id == message.id && it.chatRoomId == chatRoomId
+                },
+            )
+        }
     }
 
     @Test

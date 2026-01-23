@@ -8,6 +8,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException
 import org.springframework.web.servlet.resource.NoResourceFoundException
 import site.rahoon.message.monolithic.common.domain.DomainException
 import site.rahoon.message.monolithic.common.global.ErrorType
@@ -132,6 +133,28 @@ class CommonExceptionHandler {
             )
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
+    }
+
+    /**
+     * SSE/비동기 요청 타임아웃 처리
+     * SSE 연결이 타임아웃되는 것은 정상 시나리오이므로 WARN 레벨로 로깅
+     * 이미 연결이 끊어진 상태이므로 응답을 보낼 수 없음 (null 반환)
+     */
+    @ExceptionHandler(AsyncRequestTimeoutException::class)
+    fun handleAsyncRequestTimeoutException(
+        e: AsyncRequestTimeoutException,
+        request: HttpServletRequest,
+    ) {
+        val queryString = request.queryString?.let { "?$it" } ?: ""
+        logger.debug(
+            """
+            |Async Request Timeout (정상 종료)
+            |├─ Request: ${request.method} ${request.requestURI}$queryString
+            |├─ Exception: ${e.javaClass.simpleName}
+            |└─ Message: ${e.message ?: "No message"}
+            """.trimMargin(),
+        )
+        // 타임아웃된 SSE 연결에는 응답을 보낼 수 없으므로 아무것도 반환하지 않음
     }
 
     /**

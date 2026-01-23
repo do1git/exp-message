@@ -43,7 +43,7 @@ class LoginFailureControllerIT(
     private val userApplicationITUtils: UserApplicationITUtils,
     @LocalServerPort private var port: Int = 0,
 ) : IntegrationTestBase() {
-    private val logger = KotlinLogging.logger {}
+    override val logger = KotlinLogging.logger {}
 
     private fun authBaseUrl(): String = "http://localhost:$port/auth"
 

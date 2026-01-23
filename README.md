@@ -20,4 +20,5 @@ exp-message는 여러 기술 스택을 활용하여 구축하는 **아주 튼튼
 ## 문서
 
 - Swagger UI: [message.rahoon.site/api/swagger-ui.html](https://message.rahoon.site/api/swagger-ui.html)
+- AsyncAPI (WebSocket): [message.rahoon.site/api/websocket-docs](https://message.rahoon.site/api/websocket-docs)
 - 백엔드 개발 노트는 [00-docs/01-patch-rahoon](./00-docs/01-patch-rahoon)에서 확인하실 수 있습니다.

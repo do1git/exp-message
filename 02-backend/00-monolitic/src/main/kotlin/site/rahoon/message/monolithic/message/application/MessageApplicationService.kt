@@ -25,6 +25,7 @@ class MessageApplicationService(
     private val messageDomainService: MessageDomainService,
     private val chatRoomDomainService: ChatRoomDomainService,
     private val chatRoomMemberApplicationService: ChatRoomMemberApplicationService,
+    private val messageEventPublisher: MessageEventPublisher,
     private val zoneId: ZoneId,
 ) {
     /**
@@ -66,7 +67,9 @@ class MessageApplicationService(
         }
 
         val command = criteria.toCommand()
-        return messageDomainService.create(command)
+        val message = messageDomainService.create(command)
+        messageEventPublisher.publishCreated(MessageEvent.Created.from(message))
+        return message
     }
 
     /**

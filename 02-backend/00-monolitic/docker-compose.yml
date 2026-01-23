@@ -105,7 +105,7 @@ services:
   #     - monolitic-network
 
   nginx:
-    image: nginx:alpine
+    image: openresty/openresty:alpine
     container_name: 00-monolitic-nginx
     restart: unless-stopped
     ports:
@@ -116,10 +116,12 @@ services:
       - APP_HOST=${NGINX_APP_HOST:-host.docker.internal}
       - APP_PORT=${NGINX_APP_PORT:-8080}
       - APP_PATH_PREFIX=${NGINX_APP_PATH_PREFIX:-/api}
+      - NETWORK_DELAY_MS=${NETWORK_DELAY_MS:-50}
     command: >
       sh -c "
       apk add --no-cache gettext &&
-      envsubst '$${APP_HOST} $${APP_PORT} $${APP_PATH_PREFIX}' < /tmp/nginx-template.conf > /etc/nginx/conf.d/default.conf &&
+      envsubst '$${APP_HOST} $${APP_PORT} $${APP_PATH_PREFIX} $${NETWORK_DELAY_MS}' < /tmp/nginx-template.conf > /etc/nginx/conf.d/default.conf &&
+      sed -i 's/worker_connections  1024;/worker_connections  10000;/' /usr/local/openresty/nginx/conf/nginx.conf &&
       nginx -g 'daemon off;'
       "
     networks:
