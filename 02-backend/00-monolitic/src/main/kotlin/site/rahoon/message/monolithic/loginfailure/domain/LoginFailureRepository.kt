@@ -54,4 +54,12 @@ interface LoginFailureRepository {
      * @return 증가된 실패 횟수 리스트 (입력 순서와 동일)
      */
     fun incrementAndGetMultiple(keyTtlPairs: List<Pair<String, Duration>>): List<LoginFailure>
+
+    /**
+     * 실패 횟수를 원자적으로 증가시키고 반환합니다.
+     * 하나라도 limit 이상이면 업데이트하지 않고, 모두 limit 미만일 때만 증가시킵니다.
+     * @param keyLimitTtlTriplet 키, 최대 실패 횟수, TTL의 트리플 리스트
+     * @return Pair<Boolean, List<LoginFailure>> - 첫 번째 값은 업데이트 여부(true면 업데이트됨, false면 limit 이상으로 업데이트 안 됨), 두 번째 값은 업데이트전 LoginFailure 리스트 (입력 순서와 동일)
+     */
+    fun getAndIncrement(keyLimitTtlTriplet: List<Triple<String, Int, Duration>>): Pair<Boolean, List<LoginFailure>>
 }

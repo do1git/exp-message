@@ -11,7 +11,7 @@ data class LoginFailure(
     val failureCount: Int,
 ) {
     companion object {
-        private const val MAX_FAILURE_COUNT = 5
+        const val MAX_FAILURE_COUNT = 5
         const val LOCKOUT_DURATION_MINUTES = 15L
 
         fun create(key: String): LoginFailure = LoginFailure(key = key, failureCount = 0)

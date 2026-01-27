@@ -29,21 +29,12 @@ class AuthTokenApplicationService(
         password: String,
         ipAddress: String,
     ): AuthToken {
-        // 실패 횟수 확인 및 잠금 여부 검증
-        loginFailureTracker.checkAndThrowIfLocked(email, ipAddress)
-
-        val user =
-            try {
-                userDomainService.getUser(email, password)
-            } catch (e: DomainException) {
-                // 실패 횟수 증가 (증가 후 잠금 확인 포함)
-                loginFailureTracker.incrementFailureCount(email, ipAddress)
-                throw e
-            }
-
-        // 성공 시에도 잠금 확인 (다른 스레드가 실패하여 잠금되었을 수 있음)
-        loginFailureTracker.checkAndThrowIfLocked(email, ipAddress)
+        // 실패 횟수 증가 (원자적으로 처리, limit 이상이면 예외 발생)
+        loginFailureTracker.incrementFailureCountOrThrowIfLocked(email, ipAddress)
+        val user = userDomainService.getUser(email, password)
+        // 성공 시 실패 카운트 초기화
         loginFailureTracker.resetFailureCount(email, ipAddress)
+        // 토큰 발급
         return authTokenDomainService.issueToken(user.id)
     }
 
@@ -67,8 +58,8 @@ class AuthTokenApplicationService(
                     // 4. 사용자 조회
                     userDomainService.getUser(email, password)
                 } catch (e: DomainException) {
-                    // 5. 실패 시 실패 카운트 증가
-                    loginFailureTracker.incrementFailureCount(email, ipAddress)
+                    // 5. 실패 시 실패 카운트 증가 (원자적으로 처리, limit 이상이면 예외 발생)
+                    loginFailureTracker.incrementFailureCountOrThrowIfLocked(email, ipAddress)
                     throw e
                 }
 

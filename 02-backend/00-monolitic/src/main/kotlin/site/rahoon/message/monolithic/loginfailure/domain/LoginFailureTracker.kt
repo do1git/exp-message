@@ -64,4 +64,27 @@ class LoginFailureTracker(
         loginFailureRepository.deleteByKey(email)
         loginFailureRepository.deleteByKey(ipAddress)
     }
+
+    /**
+     * 로그인 실패 횟수를 원자적으로 증가시키고, 최대치에 도달했으면 예외를 던집니다.
+     * limit 미만일 경우 증가시키고, limit 이상이면 예외를 던집니다.
+     * 락 없이 Redis atomic operation을 사용하여 성능을 최적화합니다.
+     * @param email 사용자 이메일
+     * @param ipAddress IP 주소
+     * @throws DomainException 실패 횟수가 최대치에 도달한 경우
+     */
+    fun incrementFailureCountOrThrowIfLocked(
+        email: String,
+        ipAddress: String,
+    ) {
+        val (isUpdated, loginFailures) = loginFailureRepository.getAndIncrement(
+            listOf(
+                Triple(email, LoginFailure.MAX_FAILURE_COUNT, LOCKOUT_DURATION),
+                Triple(ipAddress, LoginFailure.MAX_FAILURE_COUNT, LOCKOUT_DURATION),
+            ),
+        )
+        if (!isUpdated) {
+            loginFailures.forEach { it.checkLocked() }
+        }
+    }
 }
