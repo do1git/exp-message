@@ -1,0 +1,15 @@
+dependencies:
+- name: mysql
+  repository: file://../01-mysql-mono
+  version: 0.1.0
+- name: redis
+  repository: file://../03-redis-mono
+  version: 0.1.0
+- name: batch-db-migration
+  repository: file://../04-batch-db-migration
+  version: 0.1.0
+- name: app-monolitic
+  repository: file://../02-app-monolitic
+  version: 0.1.0
+digest: sha256:fb485f1195729e1dabc7b7fbcf0b68a639f26a905a673cec86765d1994d26db2
+generated: "2026-01-27T11:27:11.4402214+09:00"

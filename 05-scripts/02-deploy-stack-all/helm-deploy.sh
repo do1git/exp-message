@@ -293,6 +293,81 @@ do_mysql_port_forward_background_kill() {
     log_success "Stopped $count port-forward process(es)."
 }
 
+# Status (check deployment status)
+do_status() {
+    log_info "=========================================="
+    log_info "Deployment Status Check"
+    log_info "=========================================="
+    
+    # Check kubeconfig.yaml exists
+    if [ ! -f "$KUBECONFIG_FILE" ]; then
+        log_error "kubeconfig.yaml not found: $KUBECONFIG_FILE"
+        exit 1
+    fi
+    
+    log_info "Kubeconfig: $KUBECONFIG_FILE"
+    log_info "Release name: $RELEASE_NAME"
+    echo ""
+    
+    # Check if release exists
+    local helm_list_output
+    helm_list_output=$(helm list --kubeconfig="$KUBECONFIG_FILE" 2>&1)
+    local helm_list_exit=$?
+    
+    if [ $helm_list_exit -ne 0 ]; then
+        log_error "Failed to list Helm releases:"
+        echo "$helm_list_output"
+        echo ""
+        log_warn "Continuing with Kubernetes resources check..."
+    elif ! echo "$helm_list_output" | grep -q "$RELEASE_NAME"; then
+        log_warn "Release '$RELEASE_NAME' not found in Helm releases."
+        log_info "Available Helm releases:"
+        echo "$helm_list_output" || echo "  (none)"
+        echo ""
+        log_info "Checking Kubernetes resources anyway..."
+    else
+        # Helm release status
+        log_info "--- Helm Release Status ---"
+        helm status "$RELEASE_NAME" --kubeconfig="$KUBECONFIG_FILE" || log_warn "Failed to get helm status"
+        echo ""
+    fi
+    
+    # Pods status
+    log_info "--- Pods Status ---"
+    if kubectl get pods --kubeconfig="$KUBECONFIG_FILE" \
+        -l app.kubernetes.io/instance="$RELEASE_NAME" \
+        -o wide 2>/dev/null; then
+        echo ""
+    else
+        log_warn "No pods found with label app.kubernetes.io/instance=$RELEASE_NAME"
+        echo ""
+    fi
+    
+    # Deployments status
+    log_info "--- Deployments Status ---"
+    if kubectl get deployments --kubeconfig="$KUBECONFIG_FILE" \
+        -l app.kubernetes.io/instance="$RELEASE_NAME" \
+        -o wide 2>/dev/null; then
+        echo ""
+    else
+        log_warn "No deployments found with label app.kubernetes.io/instance=$RELEASE_NAME"
+        echo ""
+    fi
+    
+    # Services status
+    log_info "--- Services Status ---"
+    if kubectl get services --kubeconfig="$KUBECONFIG_FILE" \
+        -l app.kubernetes.io/instance="$RELEASE_NAME" \
+        -o wide 2>/dev/null; then
+        echo ""
+    else
+        log_warn "No services found with label app.kubernetes.io/instance=$RELEASE_NAME"
+        echo ""
+    fi
+    
+    log_success "Status check completed!"
+}
+
 # Uninstall (delete)
 do_uninstall() {
     log_info "=========================================="
@@ -334,6 +409,7 @@ show_help() {
     echo "  install, c       Install new release"
     echo "  upgrade, u       Upgrade existing release (with pod rollout) [default]"
     echo "  uninstall, d     Delete release"
+    echo "  status, r, s     Check deployment status"
     echo "  logs-app, la     View App (00-monolitic) logs"
     echo "  logs-migration, lm  View Migration (01-db-migrations) logs"
     echo "  mysql-mono, mm [port]     Connect to MySQL shell (auto port-forward)"
@@ -347,6 +423,8 @@ show_help() {
     echo "  $0 c         # Install"
     echo "  $0 u         # Upgrade"
     echo "  $0 d         # Uninstall"
+    echo "  $0 r         # Status check"
+    echo "  $0 s         # Status check"
     echo "  $0 la        # App logs"
     echo "  $0 lm        # Migration logs"
     echo "  $0 mm        # MySQL shell (auto port-forward)"
@@ -386,6 +464,9 @@ case $ACTION in
         ;;
     upgrade|u)
         do_upgrade
+        ;;
+    status|r|s)
+        do_status
         ;;
     uninstall|d)
         do_uninstall

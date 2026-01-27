@@ -315,6 +315,87 @@ function Invoke-MySQLPortForwardBackgroundKill {
     Write-Success "Stopped $($jobs.Count) port-forward job(s)."
 }
 
+# Status (check deployment status)
+function Invoke-Status {
+    Write-Info "=========================================="
+    Write-Info "Deployment Status Check"
+    Write-Info "=========================================="
+    
+    # Check kubeconfig.yaml exists
+    if (-not (Test-Path $KubeconfigFile)) {
+        Write-Err "kubeconfig.yaml not found: $KubeconfigFile"
+        exit 1
+    }
+    
+    Write-Info "Kubeconfig: $KubeconfigFile"
+    Write-Info "Release name: $ReleaseName"
+    Write-Host ""
+    
+    # Check if release exists
+    try {
+        $releaseList = helm list --kubeconfig="$KubeconfigFile" 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Err "Failed to list Helm releases:"
+            Write-Host $releaseList
+            Write-Host ""
+            Write-Warn "Continuing with Kubernetes resources check..."
+        } elseif ($releaseList -notmatch $ReleaseName) {
+            Write-Warn "Release '$ReleaseName' not found in Helm releases."
+            Write-Info "Available Helm releases:"
+            Write-Host $releaseList
+            Write-Host ""
+            Write-Info "Checking Kubernetes resources anyway..."
+        } else {
+            # Helm release status
+            Write-Info "--- Helm Release Status ---"
+            helm status $ReleaseName --kubeconfig="$KubeconfigFile"
+            if ($LASTEXITCODE -ne 0) { Write-Warn "Failed to get helm status" }
+            Write-Host ""
+        }
+    } catch {
+        Write-Warn "Error checking Helm releases: $_"
+        Write-Info "Continuing with Kubernetes resources check..."
+    }
+    
+    # Pods status
+    Write-Info "--- Pods Status ---"
+    try {
+        kubectl get pods --kubeconfig="$KubeconfigFile" `
+            -l "app.kubernetes.io/instance=$ReleaseName" `
+            -o wide 2>$null
+        Write-Host ""
+    } catch {
+        Write-Warn "No pods found with label app.kubernetes.io/instance=$ReleaseName"
+        Write-Host ""
+    }
+    
+    # Deployments status
+    Write-Info "--- Deployments Status ---"
+    try {
+        kubectl get deployments --kubeconfig="$KubeconfigFile" `
+            -l "app.kubernetes.io/instance=$ReleaseName" `
+            -o wide 2>$null
+        Write-Host ""
+    } catch {
+        Write-Warn "No deployments found with label app.kubernetes.io/instance=$ReleaseName"
+        Write-Host ""
+    }
+    
+    # Services status
+    Write-Info "--- Services Status ---"
+    try {
+        kubectl get services --kubeconfig="$KubeconfigFile" `
+            -l "app.kubernetes.io/instance=$ReleaseName" `
+            -o wide 2>$null
+        Write-Host ""
+    } catch {
+        Write-Warn "No services found with label app.kubernetes.io/instance=$ReleaseName"
+        Write-Host ""
+    }
+    
+    Write-Success "Status check completed!"
+}
+
 # Uninstall (delete)
 function Invoke-Uninstall {
     Write-Info "=========================================="
@@ -358,6 +439,7 @@ Actions:
   install, c       Install new release
   upgrade, u       Upgrade existing release (with pod rollout) [default]
   uninstall, d     Delete release
+  status, r, s     Check deployment status
   logs-app, la     View App (00-monolitic) logs
   logs-migration, lm  View Migration (01-db-migrations) logs
   mysql-mono, mm [port]     Connect to MySQL shell (auto port-forward)
@@ -371,6 +453,8 @@ Examples:
   .\helm-deploy.ps1 c      # Install
   .\helm-deploy.ps1 u      # Upgrade
   .\helm-deploy.ps1 d      # Uninstall
+  .\helm-deploy.ps1 r      # Status check
+  .\helm-deploy.ps1 s      # Status check
   .\helm-deploy.ps1 la     # App logs
   .\helm-deploy.ps1 lm     # Migration logs
   .\helm-deploy.ps1 mm     # MySQL shell (auto port-forward)
@@ -396,6 +480,7 @@ if (-not $Action) {
 switch ($Action) {
     { $_ -in "install", "c" } { Invoke-Install }
     { $_ -in "upgrade", "u" } { Invoke-Upgrade }
+    { $_ -in "status", "r", "s" } { Invoke-Status }
     { $_ -in "uninstall", "d" } { Invoke-Uninstall }
     { $_ -in "logs-app", "la" } { Invoke-LogsApp }
     { $_ -in "logs-migration", "lm" } { Invoke-LogsMigration }
