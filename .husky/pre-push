@@ -29,6 +29,8 @@ fi
 
 cd 02-backend/00-monolitic || exit 1
 
+./gradlew clean
+
 echo ""
 echo "${BOLD}━━━ Pre-push checks (02-backend/00-monolitic) ━━━${RESET}"
 echo ""
