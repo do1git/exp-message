@@ -4,6 +4,14 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 
+/** System.nanoTime() 차이값을 밀리초로 변환할 때 사용 */
+const val NANOSECONDS_PER_MILLISECOND = 1_000_000L
+
+/**
+ * System.nanoTime() 차이값(endNano - startNano)을 밀리초로 변환
+ */
+fun Long.nanoToMs(): Long = this / NANOSECONDS_PER_MILLISECOND
+
 /**
  * LocalDateTime <-> epoch millis 변환 확장 함수
  */

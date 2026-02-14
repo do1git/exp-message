@@ -2,9 +2,7 @@ package site.rahoon.message.monolithic.common.websocket.config.session
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.event.EventListener
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import site.rahoon.message.monolithic.common.auth.CommonAuthInfo
 import site.rahoon.message.monolithic.common.domain.CommonError
@@ -14,18 +12,18 @@ import site.rahoon.message.monolithic.common.websocket.auth.WebSocketAuthControl
 import site.rahoon.message.monolithic.common.websocket.exception.WebSocketExceptionBody
 import site.rahoon.message.monolithic.common.websocket.exception.WebSocketExceptionBodyBuilder
 import site.rahoon.message.monolithic.common.websocket.exception.WebSocketExceptionController
-import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
 /**
- * Heartbeat 주기([HEARTBEAT_INTERVAL_MS])마다 등록된 세션의 TTL(만료)을 검사하고,
+ * Heartbeat 주기(websocket.heartbeat-interval-ms)마다 등록된 세션의 TTL(만료)을 검사하고,
  * 만료된 세션에 대해 ERROR 프레임을 보낸 뒤 레지스트리에서 제거한다.
  * 만료 임박 구간의 세션에는 갱신 유도 MESSAGE를 전송한다.
  *
- * - WebSocketConfig.HEARTBEAT_INTERVAL_MS와 동일 주기로 실행.
+ * - SimpleBroker heartbeat와 동일 주기로 실행.
  * - [WebSocketSessionAuthInfoRegistry]에 등록된 (sessionId, authInfo)만 검사.
+ * - ScheduledSpanAspect로 traceId/spanId 생성, @Async로 taskExecutor에서 실행(스케줄러 스레드 비점유)
  */
 @Component
 class WebSocketSessionExpiryHeartbeatTask(
@@ -37,26 +35,12 @@ class WebSocketSessionExpiryHeartbeatTask(
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    companion object {
-        /** WebSocketConfig.HEARTBEAT_INTERVAL_MS와 동일 값. */
-        private const val HEARTBEAT_INTERVAL_MS = 10000L
+    @Scheduled(fixedRateString = "\${websocket.heartbeat-interval-ms:10000}")
+    fun checkExpiredSessions() {
+        doCheckExpiredSessions()
     }
 
-    private val taskScheduler = ThreadPoolTaskScheduler().apply {
-        poolSize = 1
-        setThreadNamePrefix("ws-expiry-")
-        initialize()
-    }
-
-    @EventListener(ApplicationReadyEvent::class)
-    fun scheduleExpiryCheck() {
-        taskScheduler.scheduleAtFixedRate(
-            this::checkExpiredSessions,
-            Duration.ofMillis(HEARTBEAT_INTERVAL_MS),
-        )
-    }
-
-    private fun checkExpiredSessions() {
+    private fun doCheckExpiredSessions() {
         val now = LocalDateTime.now()
         val imminentThreshold = now.plusSeconds(imminentThresholdSeconds)
         val snapshot = sessionAuthInfoRegistry.snapshot()

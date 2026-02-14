@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <springProperty name="loggingFormat" source="logging.format" defaultValue="json"/>
+    <springProperty name="CONSOLE_LOG_PATTERN" source="logging.pattern.console" defaultValue="%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr([%6.6X{traceId:-},%6.6X{spanId:-}]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+    <!-- logging.format=plain 일 때만 평문 출력 -->
+    <if condition='"plain".equalsIgnoreCase(property("loggingFormat"))'>
+        <then>
+            <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder>
+                    <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+                    <charset>${CONSOLE_LOG_CHARSET:-UTF-8}</charset>
+                </encoder>
+            </appender>
+        </then>
+        <else>
+            <!-- 기본: JSON 출력 (logstash-logback-encoder). MDC의 traceId/spanId는 Micrometer가 HTTP 요청 시 자동 주입. 민감 정보 마스킹 적용 -->
+            <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                    <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
+                        <path>password</path>
+                        <path>secret</path>
+                        <path>token</path>
+                        <path>accessToken</path>
+                        <path>refreshToken</path>
+                        <path>authorization</path>
+                        <path>cookie</path>
+                        <path>apiKey</path>
+                        <path>api_key</path>
+                    </jsonGeneratorDecorator>
+                </encoder>
+            </appender>
+        </else>
+    </if>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

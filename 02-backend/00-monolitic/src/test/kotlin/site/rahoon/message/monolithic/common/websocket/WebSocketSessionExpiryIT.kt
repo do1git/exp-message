@@ -24,7 +24,10 @@ import java.util.concurrent.TimeUnit
  * - TTL은 CONNECT가 완료될 만큼만 여유 있게(3초). 1초면 로그인·연결 설정 중 만료되어 CONNECT 단계에서 검증 실패할 수 있음.
  */
 @TestPropertySource(
-    properties = ["authtoken.access-token-ttl-seconds=3"],
+    properties = [
+        "authtoken.access-token-ttl-seconds=3",
+        "websocket.heartbeat-interval-ms=500",
+    ],
 )
 class WebSocketSessionExpiryIT(
     private val objectMapper: ObjectMapper,
@@ -32,8 +35,8 @@ class WebSocketSessionExpiryIT(
     @LocalServerPort private var port: Int = 0,
 ) : IntegrationTestBase() {
     companion object {
-        /** WebSocketConfig.HEARTBEAT_INTERVAL_MS와 동일 값. 이 시간 이내에 만료 세션 연결이 끊겨야 함. */
-        private const val HEARTBEAT_INTERVAL_MS = 10000L
+        /** websocket.heartbeat-interval-ms(500) + 여유. 이 시간 이내에 만료 세션 연결이 끊겨야 함. */
+        private const val DISCONNECT_DEADLINE_MS = 2500L
     }
 
     @Test
@@ -48,9 +51,9 @@ class WebSocketSessionExpiryIT(
         // when: 토큰 만료 대기(3초 + 여유) 후 서버가 다음 인바운드(heartbeat 등) 시 만료 검사 → ERROR 후 연결 종료
         Thread.sleep(4000)
 
-        // then: HEARTBEAT_INTERVAL_MS 이내에 연결이 끊김
-        val pollIntervalMs = 200L
-        val deadlineMs = HEARTBEAT_INTERVAL_MS + 2000L // 여유 2초
+        // then: heartbeat 주기 이내에 연결이 끊김
+        val pollIntervalMs = 100L
+        val deadlineMs = DISCONNECT_DEADLINE_MS
         var elapsedMs = 0L
         while (elapsedMs < deadlineMs) {
             if (!session.isConnected) break

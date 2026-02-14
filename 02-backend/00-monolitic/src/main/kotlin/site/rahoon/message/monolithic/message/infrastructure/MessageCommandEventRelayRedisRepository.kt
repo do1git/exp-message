@@ -4,6 +4,8 @@ import org.redisson.api.RedissonClient
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
+import site.rahoon.message.monolithic.common.global.AsyncRunner
+import site.rahoon.message.monolithic.common.global.SpanRunner
 import site.rahoon.message.monolithic.message.application.MessageCommandEvent
 import site.rahoon.message.monolithic.message.application.MessageCommandEventRelayPort
 import java.util.concurrent.ConcurrentHashMap
@@ -45,15 +47,19 @@ class MessageCommandEventRelayRedisRepository(
         // userId를 로컬 변수로 캡처하여 클로저 문제 방지
         val capturedUserId = userId
         val listenerId = topic.addListener(MessageCommandEvent.Send::class.java) { channel, event ->
-            // 구독 해제된 경우 리스너 제거
-            if (!listenerIdMap.containsKey(capturedUserId)) {
-                val currentTopic = redissonClient.getTopic(channel.toString())
-                listenerIdMap[capturedUserId]?.let { currentTopic.removeListener(it) }
-                return@addListener
-            }
+            AsyncRunner.runAsync {
+                SpanRunner.runWithSpan("redis-topic-listener") {
+                    // 구독 해제된 경우 리스너 제거
+                    if (!listenerIdMap.containsKey(capturedUserId)) {
+                        val currentTopic = redissonClient.getTopic(channel.toString())
+                        listenerIdMap[capturedUserId]?.let { currentTopic.removeListener(it) }
+                        return@runWithSpan
+                    }
 
-            log.debug("MessageCommandEvent.Send 수신됨 - Channel: $channel, Message.Id: ${event.id}, UserId: $capturedUserId")
-            applicationEventPublisher.publishEvent(event)
+                    log.debug("MessageCommandEvent.Send 수신됨 - Channel: $channel, Message.Id: ${event.id}, UserId: $capturedUserId")
+                    applicationEventPublisher.publishEvent(event)
+                }
+            }
         }
 
         listenerIdMap[userId] = listenerId

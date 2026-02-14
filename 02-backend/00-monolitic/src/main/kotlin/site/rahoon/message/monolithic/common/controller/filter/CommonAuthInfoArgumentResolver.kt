@@ -1,6 +1,7 @@
 package site.rahoon.message.monolithic.common.controller.filter
 
 import jakarta.servlet.http.HttpServletRequest
+import org.slf4j.MDC
 import org.springframework.core.MethodParameter
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.support.WebDataBinderFactory
@@ -11,6 +12,7 @@ import site.rahoon.message.monolithic.common.auth.AuthTokenResolver
 import site.rahoon.message.monolithic.common.auth.CommonAuthInfo
 import site.rahoon.message.monolithic.common.domain.CommonError
 import site.rahoon.message.monolithic.common.domain.DomainException
+import site.rahoon.message.monolithic.common.observation.MdcKeys
 
 /**
  * AuthInfo 파라미터를 자동으로 주입하는 ArgumentResolver
@@ -78,7 +80,12 @@ class CommonAuthInfoArgumentResolver(
 
         try {
             // 토큰 검증 및 AuthInfo 반환
-            return authTokenResolver.verify(authHeader)
+            val authInfo = authTokenResolver.verify(authHeader)
+            authInfo?.let {
+                MDC.put(MdcKeys.USER_ID, it.userId)
+                MDC.put(MdcKeys.AUTH_SESSION_ID, it.sessionId)
+            }
+            return authInfo
         } catch (e: DomainException) {
             // 토큰 검증 실패
             if (required) {

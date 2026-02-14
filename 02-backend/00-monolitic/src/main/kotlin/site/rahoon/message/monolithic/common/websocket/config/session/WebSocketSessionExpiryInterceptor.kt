@@ -20,7 +20,7 @@ import java.time.LocalDateTime
  * 인바운드 메시지 수신 시 세션(토큰) 만료 여부를 주기적으로 검사한다.
  *
  * - **검사 시점**: CONNECT를 제외한 모든 STOMP 메시지(SEND, SUBSCRIBE, DISCONNECT 등) 수신 시.
- *   (클라이언트 heartbeat가 인바운드로 오지 않는 환경이면 [WebSocketSessionExpiryHeartbeatTask]가 HEARTBEAT_INTERVAL_MS 주기로 별도 검사.)
+ *   (클라이언트 heartbeat가 인바운드로 오지 않는 환경이면 [WebSocketSessionExpiryHeartbeatTask]가 websocket.heartbeat-interval-ms 주기로 별도 검사.)
  * - **만료 기준**: 세션에 저장된 [CommonAuthInfo.expiresAt](JWT exp)이 현재 시각보다 이전이면 만료로 간주.
  * - **만료 시 처리**: [DomainException](CommonError.UNAUTHORIZED)를 던져 [WebSocketExceptionStompSubProtocolErrorHandler]가
  *   ERROR 프레임을 보낸 뒤 연결을 종료한다. 갱신 유도·유예 없이 즉시 종료.

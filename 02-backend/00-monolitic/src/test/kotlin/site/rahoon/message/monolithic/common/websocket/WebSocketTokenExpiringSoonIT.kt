@@ -25,13 +25,14 @@ import java.util.concurrent.TimeUnit
  * 만료 임박 시 갱신 유도 MESSAGE 전송 통합 테스트.
  *
  * - TTL을 짧게(25초), imminent-threshold를 크게(22초) 설정해 연결 후 3초부터 임박 구간에 진입.
- * - HEARTBEAT_INTERVAL_MS(10초) 주기로 heartbeat가 실행되므로 최대 15초 이내에 token_expiring_soon 수신.
+ * - websocket.heartbeat-interval-ms(500) 주기로 heartbeat가 실행되므로 최대 4초 이내에 token_expiring_soon 수신.
  * - `/queue/session/{sessionId}/auth` 구독 후 MESSAGE 수신 검증.
  */
 @TestPropertySource(
     properties = [
         "authtoken.access-token-ttl-seconds=25",
         "websocket.imminent-threshold-seconds=22",
+        "websocket.heartbeat-interval-ms=500",
     ],
 )
 class WebSocketTokenExpiringSoonIT(
@@ -40,11 +41,8 @@ class WebSocketTokenExpiringSoonIT(
     @LocalServerPort private var port: Int = 0,
 ) : IntegrationTestBase() {
     companion object {
-        /** WebSocketConfig.HEARTBEAT_INTERVAL_MS와 동일. */
-        private const val HEARTBEAT_INTERVAL_MS = 10000L
-
-        /** 만료 임박 메시지 대기 최대 시간. (임박 진입 ~3초 + heartbeat 10초 + 여유 5초) */
-        private const val AUTH_MESSAGE_TIMEOUT_MS = 20_000L
+        /** 만료 임박 메시지 대기 최대 시간. (임박 진입 ~3초 + heartbeat 500ms + 여유 2초) */
+        private const val AUTH_MESSAGE_TIMEOUT_MS = 6_000L
     }
 
     @Test
