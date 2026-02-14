@@ -42,6 +42,7 @@ class WebSocketTokenExpiringSoonIT(
     companion object {
         /** WebSocketConfig.HEARTBEAT_INTERVAL_MS와 동일. */
         private const val HEARTBEAT_INTERVAL_MS = 10000L
+
         /** 만료 임박 메시지 대기 최대 시간. (임박 진입 ~3초 + heartbeat 10초 + 여유 5초) */
         private const val AUTH_MESSAGE_TIMEOUT_MS = 20_000L
     }
@@ -67,8 +68,7 @@ class WebSocketTokenExpiringSoonIT(
                             connectedHeaders.getFirst("session")?.let { sessionIdHolder.offer(it) }
                         }
                     },
-                )
-                .get(5, TimeUnit.SECONDS)
+                ).get(5, TimeUnit.SECONDS)
 
         val authMessages = ArrayBlockingQueue<WebSocketAuthBody>(2)
         val sessionId = sessionIdHolder.poll(2, TimeUnit.SECONDS).shouldNotBeNull()

@@ -9,7 +9,6 @@ import java.time.ZonedDateTime
  * WebSocketAuthBody 단위 테스트.
  */
 class WebSocketAuthBodyUT {
-
     @Test
     fun `EVENT_TOKEN_EXPIRING_SOON 상수`() {
         WebSocketAuthBody.EVENT_TOKEN_EXPIRING_SOON shouldBe "token_expiring_soon"

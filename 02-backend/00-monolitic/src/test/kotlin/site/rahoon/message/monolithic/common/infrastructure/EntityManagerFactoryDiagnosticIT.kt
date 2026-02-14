@@ -16,7 +16,6 @@ import site.rahoon.message.monolithic.common.test.IntegrationTestBase
  * 실행: `./gradlew integrationTest --tests "*EntityManagerFactoryDiagnosticIT"`
  */
 class EntityManagerFactoryDiagnosticIT : IntegrationTestBase() {
-
     @Autowired
     private lateinit var applicationContext: ApplicationContext
 

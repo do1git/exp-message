@@ -5,12 +5,12 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
-import site.rahoon.message.monolithic.common.domain.SoftDeleteContext
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MySQLContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.images.builder.ImageFromDockerfile
+import site.rahoon.message.monolithic.common.domain.SoftDeleteContext
 import java.nio.file.Paths
 import java.time.Duration
 
