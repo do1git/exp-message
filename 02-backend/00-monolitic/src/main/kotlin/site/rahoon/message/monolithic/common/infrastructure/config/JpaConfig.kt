@@ -30,5 +30,5 @@ import site.rahoon.message.monolithic.common.infrastructure.JpaSoftDeleteReposit
     basePackages = ["site.rahoon.message.monolithic"],
     repositoryBaseClass = JpaSoftDeleteRepositoryImpl::class,
 )
-class JpaConfig {
-}
+@Suppress("EmptyClassBlock")
+class JpaConfig
