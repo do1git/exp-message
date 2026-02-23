@@ -2,27 +2,18 @@
 
 ## 프로젝트 소개
 
-exp-message는 여러 기술 스택을 활용하여 구축하는 **아주 튼튼한 채팅 서비스 제작** 프로젝트입니다.
+exp-message는 **채널톡처럼 이용자와의 연결 창구**를 사이드 프로젝트에 제공하는 서비스입니다.  
+B2C(서비스 제공자 ↔ 이용자) 소통 창구를 위젯 형태로 삽입 가능하게 하여, 고객 문의·피드백 수집·이벤트 진행 등을 쉽게 할 수 있게 합니다.
 
-이 프로젝트의 **백엔드**는  안정성, 확장성, 성능을 모두 갖춘 엔터프라이즈급 채팅 서버를 개발하는 것을 목표합니다.
+## 핵심 기능
 
-이 프로젝트의 **프론트엔드**는 최소한의 기능만 구현하여 백엔드 서버의 안정성과 성능에 집중합니다. (프론트 개발에 관심 있으시면 편하게 연락 주세요.)
+1. **피드백 창구**: 유저가 서비스를 벗어나지 않고도, 서비스 제공자와 실시간으로 소통할 수 있는 창구
+2. **참여형 콘텐츠 창구**: 간단한 이벤트나 기능을 통해 유저의 유입과 활동을 더 높일 수 있는 창구
 
-## 주요 기능
+## 사용 사례
 
-- **사용자 인증/인가**: JWT 기반 사용자 인증 및 권한 관리
-- **채팅방 관리**: 채팅방 생성, 수정, 삭제 및 멤버 관리
-- **메시지 전송/수신**: 실시간 메시지 전송 및 수신
-- **메시지 검색**: Elasticsearch를 활용한 메시지 검색 `개발 예정`
-- **실시간 통신**: WebSocket을 통한 실시간 메시지 송수신
-- **푸시 알림**: 이벤트 기반 푸시 알림 `개발 예정`
+- 도훈 포트폴리오`도입예정`: [rahoon.site](https://rahoon.site/profile)
 
-## 문서
+## 기여하기
 
-- Swagger UI: [message.rahoon.site/api/swagger-ui.html](https://message.rahoon.site/api/swagger-ui.html)
-- AsyncAPI (WebSocket): [message.rahoon.site/api/websocket-docs](https://message.rahoon.site/api/websocket-docs/index.html)
-- 백엔드 개발 노트는 [00-docs/01-patch-rahoon](./00-docs/01-patch-rahoon)에서 확인하실 수 있습니다.
-
-## 개발 시 참고사항
-
-- 저장소를 clone한 뒤 **한 번** `npm install`을 실행해 주세요. pre-push 훅(detekt, ktlint 체크)이 적용됩니다.
+개발/기여에 관심 있으시면 [CONTRIBUTING.md](./CONTRIBUTING.md)를 참고해 주세요.
