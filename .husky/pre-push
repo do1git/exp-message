@@ -1,5 +1,6 @@
 #!/bin/sh
 # pre-push: run 05-scripts/03-test-all (clean, detekt, ktlintCheck, test)
+# 02-backend/00-monolitic 또는 02-backend/01-db-migrations 변경 시에만 실행.
 # 메시지·색상 출력은 run.sh에서 처리함.
 
 # pre-push 훅 실행 시 cwd = 저장소 루트
@@ -11,4 +12,25 @@ if [ ! -x "$SCRIPT" ]; then
   exit 1
 fi
 
-exec "$SCRIPT"
+# push 대상 ref에서 변경된 파일 중 02-backend/00-monolitic 또는 01-db-migrations 포함 여부 확인
+run_checks=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ -n "$local_sha" ] || continue
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    # 새 브랜치: push되는 전체 커밋 대상
+    files=$(git diff --name-only 0000000000000000000000000000000000000000 "$local_sha" 2>/dev/null)
+  else
+    files=$(git diff --name-only "$remote_sha" "$local_sha" 2>/dev/null)
+  fi
+  if echo "$files" | grep -qE '^02-backend/(00-monolitic|01-db-migrations)/'; then
+    run_checks=1
+    break
+  fi
+done
+
+if [ "$run_checks" = 1 ]; then
+  exec "$SCRIPT"
+else
+  echo "02-backend/00-monolitic, 01-db-migrations 변경 없음 — pre-push 검사 생략"
+  exit 0
+fi
