@@ -102,6 +102,17 @@ app-monolitic:
     password: redispassword     # Common: redispassword
 
 # ============================================================================
+# Web Landing Configuration (for Helm chart)
+# ============================================================================
+web-landing:
+  enabled: true
+  image:
+    registry: "localhost:5000"
+    repository: 00-landing
+    tag: "latest"
+    pullPolicy: Always
+
+# ============================================================================
 # Ingress Configuration (for Helm chart)
 # ============================================================================
 ingress:

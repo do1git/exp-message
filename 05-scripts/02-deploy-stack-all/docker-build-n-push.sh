@@ -9,6 +9,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VALUES_FILE="${SCRIPT_DIR}/values.yaml"
 BACKEND_DIR="${SCRIPT_DIR}/../../02-backend"
+FRONTEND_DIR="${SCRIPT_DIR}/../../03-frontend"
 
 # Color definitions
 RED='\033[0;31m'
@@ -147,10 +148,16 @@ main() {
     MIG_TAG=$(get_yaml_value "batch-db-migration.image.tag" "$VALUES_FILE")
     MIG_TAG="${MIG_TAG:-latest}"
     
+    LANDING_REGISTRY=$(get_yaml_value "web-landing.image.registry" "$VALUES_FILE")
+    LANDING_REPOSITORY=$(get_yaml_value "web-landing.image.repository" "$VALUES_FILE")
+    LANDING_TAG=$(get_yaml_value "web-landing.image.tag" "$VALUES_FILE")
+    LANDING_TAG="${LANDING_TAG:-latest}"
+    
     # Display parsed image settings
     log_info "Image configurations:"
     log_info "  [app]       ${APP_REGISTRY}/${APP_REPOSITORY}:${APP_TAG}"
     log_info "  [migration] ${MIG_REGISTRY}/${MIG_REPOSITORY}:${MIG_TAG}"
+    log_info "  [landing]  ${LANDING_REGISTRY}/${LANDING_REPOSITORY}:${LANDING_TAG}"
     echo ""
     
     # Create log files in .log directory
@@ -158,8 +165,10 @@ main() {
     mkdir -p "$LOG_DIR"
     APP_LOG="${LOG_DIR}/docker-build-n-push-app.log"
     MIG_LOG="${LOG_DIR}/docker-build-n-push-migration.log"
+    LANDING_LOG="${LOG_DIR}/docker-build-n-push-landing.log"
     > "$APP_LOG"  # Clear/create file
     > "$MIG_LOG"  # Clear/create file
+    > "$LANDING_LOG"  # Clear/create file
     
     log_info "Starting parallel builds..."
     echo ""
@@ -168,6 +177,7 @@ main() {
     log_info "Log files (use 'tail -f <path>' to monitor):"
     log_info "  [app]       $APP_LOG"
     log_info "  [migration] $MIG_LOG"
+    log_info "  [landing]  $LANDING_LOG"
     echo ""
     
     # Run parallel builds
@@ -177,16 +187,21 @@ main() {
     build_and_push "migration" "$MIG_REGISTRY" "$MIG_REPOSITORY" "$MIG_TAG" "${BACKEND_DIR}/01-db-migrations" "$MIG_LOG" &
     MIG_PID=$!
     
+    build_and_push "landing" "$LANDING_REGISTRY" "$LANDING_REPOSITORY" "$LANDING_TAG" "${FRONTEND_DIR}/00-landing" "$LANDING_LOG" &
+    LANDING_PID=$!
+    
     log_info "[app] Building... (PID: $APP_PID)"
     log_info "[migration] Building... (PID: $MIG_PID)"
+    log_info "[landing] Building... (PID: $LANDING_PID)"
     echo ""
     
     # Monitor progress while waiting
     log_info "Progress (updates every 3 seconds):"
-    while kill -0 $APP_PID 2>/dev/null || kill -0 $MIG_PID 2>/dev/null; do
+    while kill -0 $APP_PID 2>/dev/null || kill -0 $MIG_PID 2>/dev/null || kill -0 $LANDING_PID 2>/dev/null; do
         # Get last meaningful line from each log
         APP_STATUS="waiting..."
         MIG_STATUS="waiting..."
+        LANDING_STATUS="waiting..."
         
         if [ -f "$APP_LOG" ] && [ -s "$APP_LOG" ]; then
             APP_LAST=$(tail -1 "$APP_LOG" 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | cut -c1-60)
@@ -198,12 +213,19 @@ main() {
             [ -n "$MIG_LAST" ] && MIG_STATUS="$MIG_LAST"
         fi
         
+        if [ -f "$LANDING_LOG" ] && [ -s "$LANDING_LOG" ]; then
+            LANDING_LAST=$(tail -1 "$LANDING_LOG" 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | cut -c1-60)
+            [ -n "$LANDING_LAST" ] && LANDING_STATUS="$LANDING_LAST"
+        fi
+        
         # Check if processes are still running
         APP_RUNNING=$(kill -0 $APP_PID 2>/dev/null && echo "running" || echo "done")
         MIG_RUNNING=$(kill -0 $MIG_PID 2>/dev/null && echo "running" || echo "done")
+        LANDING_RUNNING=$(kill -0 $LANDING_PID 2>/dev/null && echo "running" || echo "done")
         
         echo -e "  ${BLUE}[app]${NC} (${APP_RUNNING}) ${APP_STATUS}"
         echo -e "  ${BLUE}[mig]${NC} (${MIG_RUNNING}) ${MIG_STATUS}"
+        echo -e "  ${BLUE}[landing]${NC} (${LANDING_RUNNING}) ${LANDING_STATUS}"
         echo ""
         
         sleep 3
@@ -212,16 +234,19 @@ main() {
     # Wait for all processes and get exit codes
     APP_EXIT=0
     MIG_EXIT=0
+    LANDING_EXIT=0
     
     wait $APP_PID 2>/dev/null || APP_EXIT=$?
     wait $MIG_PID 2>/dev/null || MIG_EXIT=$?
+    wait $LANDING_PID 2>/dev/null || LANDING_EXIT=$?
     
     # Check final result
-    if [ $APP_EXIT -ne 0 ] || [ $MIG_EXIT -ne 0 ]; then
+    if [ $APP_EXIT -ne 0 ] || [ $MIG_EXIT -ne 0 ] || [ $LANDING_EXIT -ne 0 ]; then
         log_error "=========================================="
         log_error "Some builds failed!"
         [ $APP_EXIT -ne 0 ] && log_error "  - app build failed (exit: $APP_EXIT)"
         [ $MIG_EXIT -ne 0 ] && log_error "  - migration build failed (exit: $MIG_EXIT)"
+        [ $LANDING_EXIT -ne 0 ] && log_error "  - landing build failed (exit: $LANDING_EXIT)"
         log_error "=========================================="
         exit 1
     fi

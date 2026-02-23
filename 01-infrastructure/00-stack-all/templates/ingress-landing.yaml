@@ -1,0 +1,24 @@
+{{- if and .Values.ingress.enabled (index .Values "web-landing" "enabled") -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "stack-monolitic.fullname" . }}-ingress-landing
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "stack-monolitic.labels" . | nindent 4 }}
+spec:
+  ingressClassName: nginx
+
+  rules:
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ printf "%s-%s" .Release.Name "web-landing" | trunc 63 | trimSuffix "-" }}
+                port:
+                  number: {{ index .Values "web-landing" "service" "port" | default 80 }}
+{{- end }}

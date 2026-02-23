@@ -93,6 +93,23 @@ services:
     networks:
       - compose-monolitic-network
 
+  web-landing:
+    build:
+      context: ../../03-frontend/00-landing
+      dockerfile: Dockerfile
+    container_name: compose-00-monolitic-web-landing
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
+        reservations:
+          cpus: '0.05'
+          memory: 32M
+    networks:
+      - compose-monolitic-network
+
   00-monolitic:
     build:
       context: ../../02-backend/00-monolitic
@@ -134,6 +151,9 @@ services:
     image: openresty/openresty:alpine
     container_name: compose-00-monolitic-nginx
     restart: unless-stopped
+    depends_on:
+      - web-landing
+      - 00-monolitic
     ports:
       - "${NGINX_PORT:-80}:80"
     volumes:
@@ -142,11 +162,13 @@ services:
       - APP_HOST=${NGINX_APP_HOST:-00-monolitic}
       - APP_PORT=${NGINX_APP_PORT:-8080}
       - APP_PATH_PREFIX=${NGINX_APP_PATH_PREFIX:-/api}
+      - LANDING_HOST=${NGINX_LANDING_HOST:-web-landing}
+      - LANDING_PORT=${NGINX_LANDING_PORT:-80}
       - NETWORK_DELAY_MS=${NETWORK_DELAY_MS:-50}
     command: >
       sh -c "
       apk add --no-cache gettext &&
-      envsubst '$${APP_HOST} $${APP_PORT} $${APP_PATH_PREFIX} $${NETWORK_DELAY_MS}' < /tmp/nginx-template.conf > /etc/nginx/conf.d/default.conf &&
+      envsubst '$${APP_HOST} $${APP_PORT} $${APP_PATH_PREFIX} $${LANDING_HOST} $${LANDING_PORT} $${NETWORK_DELAY_MS}' < /tmp/nginx-template.conf > /etc/nginx/conf.d/default.conf &&
       sed -i 's/worker_connections  1024;/worker_connections  10000;/' /usr/local/openresty/nginx/conf/nginx.conf &&
       nginx -g 'daemon off;'
       "

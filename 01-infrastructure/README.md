@@ -19,3 +19,4 @@
 - `02-app-monolitic`: 모놀리틱 애플리케이션 Helm Chart
 - `03-redis-mono`: Redis 서비스 Helm Chart
 - `04-batch-db-migration`: DB 마이그레이션 Job Helm Chart
+- `05-web-landing`: 랜딩 페이지 Helm Chart (소스: `03-frontend/00-landing`)

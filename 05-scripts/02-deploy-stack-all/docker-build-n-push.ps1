@@ -12,6 +12,7 @@ $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ValuesFile = Join-Path $ScriptDir "values.yaml"
 $BackendDir = Join-Path $ScriptDir "..\..\02-backend"
+$FrontendDir = Join-Path $ScriptDir "..\..\03-frontend"
 
 # Colored output functions
 function Write-Info { param($Message) Write-Host "[INFO] $Message" -ForegroundColor Blue }
@@ -182,10 +183,17 @@ function Main {
     if (-not $migTag) { $migTag = "latest" }
     $migSourceDir = Join-Path $BackendDir "01-db-migrations"
     
+    $landingRegistry = Get-YamlValue -KeyPath "web-landing.image.registry" -FilePath $ValuesFile
+    $landingRepository = Get-YamlValue -KeyPath "web-landing.image.repository" -FilePath $ValuesFile
+    $landingTag = Get-YamlValue -KeyPath "web-landing.image.tag" -FilePath $ValuesFile
+    if (-not $landingTag) { $landingTag = "latest" }
+    $landingSourceDir = Join-Path $FrontendDir "00-landing"
+    
     # Display parsed image settings
     Write-Info "Image configurations:"
     Write-Info "  [app]       ${appRegistry}/${appRepository}:${appTag}"
     Write-Info "  [migration] ${migRegistry}/${migRepository}:${migTag}"
+    Write-Info "  [landing]  ${landingRegistry}/${landingRepository}:${landingTag}"
     Write-Host ""
     
     # Create log files in .log directory
@@ -193,8 +201,10 @@ function Main {
     if (-not (Test-Path $logDir)) { New-Item -Path $logDir -ItemType Directory -Force | Out-Null }
     $appLogFile = Join-Path $logDir "docker-build-n-push-app.log"
     $migLogFile = Join-Path $logDir "docker-build-n-push-migration.log"
+    $landingLogFile = Join-Path $logDir "docker-build-n-push-landing.log"
     New-Item -Path $appLogFile -ItemType File -Force | Out-Null
     New-Item -Path $migLogFile -ItemType File -Force | Out-Null
+    New-Item -Path $landingLogFile -ItemType File -Force | Out-Null
     
     Write-Info "Starting parallel builds..."
     Write-Host ""
@@ -203,14 +213,17 @@ function Main {
     Write-Info "Log files (use 'Get-Content -Wait <path>' to monitor):"
     Write-Info "  [app]       $appLogFile"
     Write-Info "  [migration] $migLogFile"
+    Write-Info "  [landing]  $landingLogFile"
     Write-Host ""
     
     # Run parallel builds
     $appJob = Start-Job -ScriptBlock $BuildScript -ArgumentList "app", $appRegistry, $appRepository, $appTag, $appSourceDir, $appLogFile
     $migJob = Start-Job -ScriptBlock $BuildScript -ArgumentList "migration", $migRegistry, $migRepository, $migTag, $migSourceDir, $migLogFile
+    $landingJob = Start-Job -ScriptBlock $BuildScript -ArgumentList "landing", $landingRegistry, $landingRepository, $landingTag, $landingSourceDir, $landingLogFile
     
     Write-Info "[app] Building... (JobId: $($appJob.Id))"
     Write-Info "[migration] Building... (JobId: $($migJob.Id))"
+    Write-Info "[landing] Building... (JobId: $($landingJob.Id))"
     Write-Host ""
     
     # Read log files with shared access to avoid file locking
@@ -231,9 +244,10 @@ function Main {
     
     # Monitor progress while waiting
     Write-Info "Progress (updates every 3 seconds):"
-    while (($appJob.State -eq "Running") -or ($migJob.State -eq "Running")) {
+    while (($appJob.State -eq "Running") -or ($migJob.State -eq "Running") -or ($landingJob.State -eq "Running")) {
         $appStatus = "waiting..."
         $migStatus = "waiting..."
+        $landingStatus = "waiting..."
         
         $appLastLine = Read-LastLine $appLogFile
         if ($appLastLine) { $appStatus = $appLastLine.Substring(0, [Math]::Min(60, $appLastLine.Length)) }
@@ -241,28 +255,35 @@ function Main {
         $migLastLine = Read-LastLine $migLogFile
         if ($migLastLine) { $migStatus = $migLastLine.Substring(0, [Math]::Min(60, $migLastLine.Length)) }
         
+        $landingLastLine = Read-LastLine $landingLogFile
+        if ($landingLastLine) { $landingStatus = $landingLastLine.Substring(0, [Math]::Min(60, $landingLastLine.Length)) }
+        
         $appState = if ($appJob.State -eq "Running") { "running" } else { "done" }
         $migState = if ($migJob.State -eq "Running") { "running" } else { "done" }
+        $landingState = if ($landingJob.State -eq "Running") { "running" } else { "done" }
         
         Write-Host "  [app] ($appState) $appStatus" -ForegroundColor Blue
         Write-Host "  [mig] ($migState) $migStatus" -ForegroundColor Blue
+        Write-Host "  [landing] ($landingState) $landingStatus" -ForegroundColor Blue
         Write-Host ""
         
         Start-Sleep -Seconds 3
     }
     
     # Wait for jobs to complete and get exit codes
-    $appJob, $migJob | Wait-Job | Out-Null
+    $appJob, $migJob, $landingJob | Wait-Job | Out-Null
     $appExitCode = Receive-Job -Job $appJob
     $migExitCode = Receive-Job -Job $migJob
-    Remove-Job -Job $appJob, $migJob
+    $landingExitCode = Receive-Job -Job $landingJob
+    Remove-Job -Job $appJob, $migJob, $landingJob
     
     # Check final result
-    if ($appExitCode -ne 0 -or $migExitCode -ne 0) {
+    if ($appExitCode -ne 0 -or $migExitCode -ne 0 -or $landingExitCode -ne 0) {
         Write-Err "=========================================="
         Write-Err "Some builds failed!"
         if ($appExitCode -ne 0) { Write-Err "  - app build failed" }
         if ($migExitCode -ne 0) { Write-Err "  - migration build failed" }
+        if ($landingExitCode -ne 0) { Write-Err "  - landing build failed" }
         Write-Err "=========================================="
         exit 1
     }

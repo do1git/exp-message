@@ -22,3 +22,7 @@ dependencies:
     version: "0.1.0"
     repository: "file://../02-app-monolitic"
     condition: app-monolitic.enabled
+  - name: web-landing
+    version: "0.1.0"
+    repository: "file://../05-web-landing"
+    condition: web-landing.enabled

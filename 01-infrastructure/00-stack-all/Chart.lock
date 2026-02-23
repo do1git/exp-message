@@ -11,5 +11,8 @@ dependencies:
 - name: app-monolitic
   repository: file://../02-app-monolitic
   version: 0.1.0
-digest: sha256:fb485f1195729e1dabc7b7fbcf0b68a639f26a905a673cec86765d1994d26db2
-generated: "2026-01-27T11:27:11.4402214+09:00"
+- name: web-landing
+  repository: file://../05-web-landing
+  version: 0.1.0
+digest: sha256:f127c1b4c5e51ec9cd2624704c777831734b995239aa1fe1fd6ec5057b89c60d
+generated: "2026-02-23T19:28:09.704659+09:00"
