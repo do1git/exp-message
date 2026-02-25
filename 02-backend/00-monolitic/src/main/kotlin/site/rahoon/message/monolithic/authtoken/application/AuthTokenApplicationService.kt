@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service
 import site.rahoon.message.monolithic.authtoken.domain.AccessToken
 import site.rahoon.message.monolithic.authtoken.domain.AuthToken
 import site.rahoon.message.monolithic.authtoken.domain.AuthTokenDomainService
+import site.rahoon.message.monolithic.authtoken.domain.AuthTokenError
+import site.rahoon.message.monolithic.common.domain.CommonError
 import site.rahoon.message.monolithic.common.domain.DomainException
 import site.rahoon.message.monolithic.common.global.Lock
 import site.rahoon.message.monolithic.loginfailure.domain.LoginFailureError
@@ -35,7 +37,7 @@ class AuthTokenApplicationService(
         // 성공 시 실패 카운트 초기화
         loginFailureTracker.resetFailureCount(email, ipAddress)
         // 토큰 발급
-        return authTokenDomainService.issueToken(user.id)
+        return authTokenDomainService.issueToken(user.id, user.role.code)
     }
 
     fun loginWithLock(
@@ -65,12 +67,28 @@ class AuthTokenApplicationService(
 
             // 6. 성공 시 실패 카운트 초기화
             loginFailureTracker.resetFailureCount(email, ipAddress)
-            authTokenDomainService.issueToken(user.id)
+            authTokenDomainService.issueToken(user.id, user.role.code)
         }
     }
 
     // Refresh
-    fun refresh(refreshToken: String): AuthToken = authTokenDomainService.refresh(refreshToken)
+    fun refresh(refreshTokenString: String): AuthToken =
+        Lock.execute(listOf("refresh:$refreshTokenString")) { locked, _ ->
+            if (!locked) {
+                throw DomainException(
+                    error = CommonError.CONFLICT,
+                    details = mapOf("reason" to "Refresh already in progress for this token"),
+                )
+            }
+            val refreshToken =
+                authTokenDomainService.findRefreshToken(refreshTokenString)
+                    ?: throw DomainException(
+                        error = AuthTokenError.INVALID_TOKEN,
+                        details = mapOf("refreshToken" to refreshTokenString),
+                    )
+            val user = userDomainService.getById(refreshToken.userId)
+            authTokenDomainService.refresh(refreshTokenString, user.role.code)
+        }
 
     // Logout
     fun logout(sessionId: String) {

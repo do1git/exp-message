@@ -7,5 +7,7 @@ interface UserRepository {
 
     fun findByEmail(email: String): User?
 
+    fun existsByRole(role: UserRole): Boolean
+
     fun delete(id: String)
 }

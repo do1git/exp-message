@@ -51,7 +51,7 @@ class AuthController(
     ): CommonApiResponse<AuthResponse.Login> {
         val authToken =
             authTokenApplicationService.refresh(
-                refreshToken = request.refreshToken,
+                refreshTokenString = request.refreshToken,
             )
         val response = AuthResponse.Login.from(authToken)
 

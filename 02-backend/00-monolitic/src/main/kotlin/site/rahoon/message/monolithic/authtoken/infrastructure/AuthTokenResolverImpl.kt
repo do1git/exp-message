@@ -5,6 +5,7 @@ import site.rahoon.message.monolithic.authtoken.domain.AuthTokenError
 import site.rahoon.message.monolithic.authtoken.domain.component.AccessTokenVerifier
 import site.rahoon.message.monolithic.common.auth.AuthTokenResolver
 import site.rahoon.message.monolithic.common.auth.CommonAuthInfo
+import site.rahoon.message.monolithic.common.auth.CommonAuthRole
 import site.rahoon.message.monolithic.common.domain.CommonError
 import site.rahoon.message.monolithic.common.domain.DomainException
 
@@ -35,6 +36,7 @@ class AuthTokenResolverImpl(
                 userId = accessToken.userId,
                 sessionId = accessToken.sessionId,
                 expiresAt = accessToken.expiresAt,
+                role = CommonAuthRole.fromCode(accessToken.role),
             )
         } catch (e: DomainException) {
             // AuthTokenError

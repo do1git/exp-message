@@ -1,6 +1,7 @@
 package site.rahoon.message.monolithic.user.controller
 
 import site.rahoon.message.monolithic.user.domain.UserInfo
+import site.rahoon.message.monolithic.user.domain.UserRole
 import java.time.LocalDateTime
 
 /**
@@ -37,6 +38,7 @@ object UserResponse {
         val id: String,
         val email: String,
         val nickname: String,
+        val role: UserRole,
         val createdAt: LocalDateTime,
         val updatedAt: LocalDateTime,
     ) {
@@ -49,6 +51,7 @@ object UserResponse {
                     id = userInfo.id,
                     email = userInfo.email,
                     nickname = userInfo.nickname,
+                    role = userInfo.role,
                     createdAt = userInfo.createdAt,
                     updatedAt = userInfo.updatedAt,
                 )

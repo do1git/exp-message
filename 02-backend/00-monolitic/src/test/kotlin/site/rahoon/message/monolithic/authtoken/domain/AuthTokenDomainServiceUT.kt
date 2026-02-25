@@ -53,6 +53,7 @@ class AuthTokenDomainServiceUT {
                 expiresAt = LocalDateTime.now().plusHours(1),
                 userId = userId,
                 sessionId = sessionId,
+                role = "USER",
             )
         val refreshToken =
             RefreshToken(
@@ -63,12 +64,12 @@ class AuthTokenDomainServiceUT {
                 createdAt = LocalDateTime.now(),
             )
 
-        every { accessTokenIssuer.issue(any(), any()) } returns accessToken
+        every { accessTokenIssuer.issue(any(), any(), any()) } returns accessToken
         every { refreshTokenIssuer.issue(any(), any()) } returns refreshToken
         every { authTokenRepository.saveRefreshToken(any<RefreshToken>()) } returns refreshToken
 
         // when
-        val result = authTokenDomainService.issueToken(userId)
+        val result = authTokenDomainService.issueToken(userId, "USER")
 
         // then
         result.shouldNotBeNull()
@@ -77,7 +78,7 @@ class AuthTokenDomainServiceUT {
         result.accessToken.userId shouldBe userId
         result.refreshToken?.userId shouldBe userId
 
-        verify { accessTokenIssuer.issue(any(), any()) }
+        verify { accessTokenIssuer.issue(any(), any(), any()) }
         verify { refreshTokenIssuer.issue(any(), any()) }
         verify { authTokenRepository.saveRefreshToken(any<RefreshToken>()) }
     }
@@ -93,6 +94,7 @@ class AuthTokenDomainServiceUT {
                 expiresAt = LocalDateTime.now().plusHours(1),
                 userId = userId,
                 sessionId = prevSessionId,
+                role = "USER",
             )
         val refreshToken =
             RefreshToken(
@@ -103,12 +105,12 @@ class AuthTokenDomainServiceUT {
                 createdAt = LocalDateTime.now(),
             )
 
-        every { accessTokenIssuer.issue(userId, prevSessionId) } returns accessToken
+        every { accessTokenIssuer.issue(userId, prevSessionId, any()) } returns accessToken
         every { refreshTokenIssuer.issue(userId, prevSessionId) } returns refreshToken
         every { authTokenRepository.saveRefreshToken(refreshToken) } returns refreshToken
 
         // when
-        val result = authTokenDomainService.issueToken(userId, prevSessionId)
+        val result = authTokenDomainService.issueToken(userId, "USER", prevSessionId)
 
         // then
         result.shouldNotBeNull()
@@ -117,7 +119,7 @@ class AuthTokenDomainServiceUT {
         result.accessToken.sessionId shouldBe prevSessionId
         result.refreshToken?.sessionId shouldBe prevSessionId
 
-        verify { accessTokenIssuer.issue(userId, prevSessionId) }
+        verify { accessTokenIssuer.issue(userId, prevSessionId, any()) }
         verify { refreshTokenIssuer.issue(userId, prevSessionId) }
         verify { authTokenRepository.saveRefreshToken(refreshToken) }
     }
@@ -132,6 +134,7 @@ class AuthTokenDomainServiceUT {
                 expiresAt = LocalDateTime.now().plusHours(1),
                 userId = "user123",
                 sessionId = "session123",
+                role = "USER",
             )
 
         every { accessTokenVerifier.verify(tokenString) } returns accessToken
@@ -180,6 +183,7 @@ class AuthTokenDomainServiceUT {
                 expiresAt = LocalDateTime.now().plusHours(1),
                 userId = userId,
                 sessionId = sessionId,
+                role = "USER",
             )
         val newRefreshToken =
             RefreshToken(
@@ -192,12 +196,12 @@ class AuthTokenDomainServiceUT {
 
         every { authTokenRepository.findRefreshToken(refreshTokenString) } returns oldRefreshToken
         every { authTokenRepository.deleteRefreshToken(refreshTokenString) } returns Unit
-        every { accessTokenIssuer.issue(userId, sessionId) } returns newAccessToken
+        every { accessTokenIssuer.issue(userId, sessionId, any()) } returns newAccessToken
         every { refreshTokenIssuer.issue(userId, sessionId) } returns newRefreshToken
         every { authTokenRepository.saveRefreshToken(newRefreshToken) } returns newRefreshToken
 
         // when
-        val result = authTokenDomainService.refresh(refreshTokenString)
+        val result = authTokenDomainService.refresh(refreshTokenString, "USER")
 
         // then
         result.shouldNotBeNull()
@@ -208,7 +212,7 @@ class AuthTokenDomainServiceUT {
 
         verify { authTokenRepository.findRefreshToken(refreshTokenString) }
         verify { authTokenRepository.deleteRefreshToken(refreshTokenString) }
-        verify { accessTokenIssuer.issue(userId, sessionId) }
+        verify { accessTokenIssuer.issue(userId, sessionId, any()) }
         verify { refreshTokenIssuer.issue(userId, sessionId) }
         verify { authTokenRepository.saveRefreshToken(newRefreshToken) }
     }
@@ -222,7 +226,7 @@ class AuthTokenDomainServiceUT {
         // when & then
         val exception =
             assertThrows<DomainException> {
-                authTokenDomainService.refresh(invalidRefreshToken)
+                authTokenDomainService.refresh(invalidRefreshToken, "USER")
             }
 
         exception.error shouldBe AuthTokenError.INVALID_TOKEN
@@ -232,7 +236,7 @@ class AuthTokenDomainServiceUT {
         verify { authTokenRepository.findRefreshToken(invalidRefreshToken) }
         verify(exactly = 0) { authTokenRepository.deleteRefreshToken(any()) }
         verify(exactly = 0) { authTokenRepository.saveRefreshToken(any<RefreshToken>()) }
-        verify(exactly = 0) { accessTokenIssuer.issue(any(), any()) }
+        verify(exactly = 0) { accessTokenIssuer.issue(any(), any(), any()) }
         verify(exactly = 0) { refreshTokenIssuer.issue(any(), any()) }
     }
 }

@@ -8,6 +8,7 @@ data class AccessToken(
     val expiresAt: LocalDateTime,
     val userId: String,
     val sessionId: String,
+    val role: String,
 )
 
 /** DB 저장 stateful refresh token */

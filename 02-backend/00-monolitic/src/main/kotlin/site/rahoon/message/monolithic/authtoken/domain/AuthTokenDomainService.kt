@@ -14,12 +14,16 @@ class AuthTokenDomainService(
     private val refreshTokenIssuer: RefreshTokenIssuer,
     private val authTokenRepository: AuthTokenRepository,
 ) {
+    /**
+     * @param role 애플리케이션 레이어에서 전달받은 사용자 역할 (ADMIN, USER)
+     */
     fun issueToken(
         userId: String,
+        role: String,
         prevSessionId: String? = null,
     ): AuthToken {
         val sessionId = prevSessionId ?: UUID.randomUUID().toString()
-        val accessToken = accessTokenIssuer.issue(userId, sessionId)
+        val accessToken = accessTokenIssuer.issue(userId, sessionId, role)
         val refreshToken = refreshTokenIssuer.issue(userId, sessionId)
         authTokenRepository.saveRefreshToken(refreshToken)
         return AuthToken(accessToken, refreshToken)
@@ -27,11 +31,26 @@ class AuthTokenDomainService(
 
     fun verifyAccessToken(accessToken: String): AccessToken = accessTokenVerifier.verify(accessToken)
 
+    /**
+     * Refresh Token이 존재하면 반환하고, 없으면 null을 반환합니다.
+     * 토큰을 소비하지 않습니다.
+     */
+    fun findRefreshToken(refreshTokenString: String): RefreshToken? = authTokenRepository.findRefreshToken(refreshTokenString)
+
     fun expireBySessionId(sessionId: String) {
         authTokenRepository.deleteRefreshTokenBySessionId(sessionId)
     }
 
-    fun refresh(refreshTokenString: String): AuthToken {
+    /**
+     * Refresh Token으로 새 토큰을 발급합니다.
+     *
+     * @param refreshTokenString Refresh Token 문자열
+     * @param role 애플리케이션 레이어에서 전달받은 사용자 역할 (ADMIN, USER)
+     */
+    fun refresh(
+        refreshTokenString: String,
+        role: String,
+    ): AuthToken {
         val refreshToken =
             authTokenRepository.findRefreshToken(refreshTokenString)
                 ?: throw DomainException(
@@ -39,6 +58,6 @@ class AuthTokenDomainService(
                     details = mapOf("refreshToken" to refreshTokenString),
                 )
         authTokenRepository.deleteRefreshToken(refreshToken.token)
-        return issueToken(refreshToken.userId, refreshToken.sessionId)
+        return issueToken(refreshToken.userId, role, refreshToken.sessionId)
     }
 }

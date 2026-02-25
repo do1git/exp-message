@@ -11,6 +11,7 @@ object UserInfo {
         val id: String,
         val email: String,
         val nickname: String,
+        val role: UserRole,
         val createdAt: LocalDateTime,
         val updatedAt: LocalDateTime,
     ) {
@@ -24,6 +25,7 @@ object UserInfo {
                     id = user.id,
                     email = user.email,
                     nickname = user.nickname,
+                    role = user.role,
                     createdAt = user.createdAt,
                     updatedAt = user.updatedAt,
                 )

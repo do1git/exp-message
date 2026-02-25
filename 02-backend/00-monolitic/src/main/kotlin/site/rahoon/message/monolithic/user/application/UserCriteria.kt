@@ -30,4 +30,18 @@ object UserCriteria {
                 nickname = this.nickname,
             )
     }
+
+    /** Default admin: create or update always */
+    data class CreateOrUpdateAdmin(
+        val email: String,
+        val password: String,
+        val nickname: String,
+    )
+
+    /** Default admin: create only if not exists */
+    data class CreateAdminIfNotExists(
+        val email: String,
+        val password: String,
+        val nickname: String,
+    )
 }

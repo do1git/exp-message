@@ -17,6 +17,7 @@ object AuthResponse {
         val refreshTokenExpiresAt: LocalDateTime?,
         val userId: String,
         val sessionId: String,
+        val role: String,
     ) {
         companion object {
             /**
@@ -30,6 +31,7 @@ object AuthResponse {
                     refreshTokenExpiresAt = authToken.refreshToken?.expiresAt,
                     userId = authToken.accessToken.userId,
                     sessionId = authToken.accessToken.sessionId,
+                    role = authToken.accessToken.role,
                 )
         }
     }

@@ -15,6 +15,7 @@ enum class CommonError(
     CONFLICT("COMMON_002", "Resource conflict", ErrorType.CONFLICT),
     CLIENT_ERROR("COMMON_003", "Invalid request", ErrorType.CLIENT_ERROR),
     UNAUTHORIZED("COMMON_005", "Unauthorized", ErrorType.UNAUTHORIZED),
+    FORBIDDEN("COMMON_008", "Forbidden", ErrorType.FORBIDDEN),
     SERVER_ERROR("COMMON_004", "Internal server error", ErrorType.SERVER_ERROR),
 
     INVALID_PAGE_CURSOR("COMMON_006", "Invalid page cursor", ErrorType.CLIENT_ERROR),

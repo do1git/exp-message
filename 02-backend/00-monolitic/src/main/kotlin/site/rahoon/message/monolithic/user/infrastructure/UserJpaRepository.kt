@@ -8,4 +8,6 @@ import java.util.Optional
  */
 interface UserJpaRepository : JpaSoftDeleteRepository<UserEntity, String> {
     fun findByEmail(email: String): Optional<UserEntity>
+
+    fun existsByRole(role: String): Boolean
 }

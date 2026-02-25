@@ -27,11 +27,13 @@ class AccessTokenIssuer(
      *
      * @param userId 사용자 ID
      * @param sessionId 세션 ID
+     * @param role 사용자 역할 (ADMIN, USER)
      * @return AccessToken (JWT 토큰 문자열과 만료 시간 포함)
      */
     fun issue(
         userId: String,
         sessionId: String,
+        role: String,
     ): AccessToken {
         val now = Instant.now()
         val expiresAt =
@@ -51,6 +53,7 @@ class AccessTokenIssuer(
                 .claim("typ", "access") // 커스텀 클레임: 토큰 타입
                 .claim("uid", userId) // 커스텀 클레임: 사용자 ID
                 .claim("sid", sessionId) // 커스텀 클레임: 세션 ID
+                .claim("role", role) // 커스텀 클레임: 사용자 역할
                 .signWith(secretKey) // HS256 서명
                 .compact()
 
@@ -59,6 +62,7 @@ class AccessTokenIssuer(
             expiresAt = LocalDateTime.ofInstant(expiresAt, ZoneId.systemDefault()),
             userId = userId,
             sessionId = sessionId,
+            role = role,
         )
     }
 }

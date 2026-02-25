@@ -4,6 +4,7 @@ import org.springframework.transaction.annotation.Transactional
 import site.rahoon.message.monolithic.common.global.TransactionalRepository
 import site.rahoon.message.monolithic.user.domain.User
 import site.rahoon.message.monolithic.user.domain.UserRepository
+import site.rahoon.message.monolithic.user.domain.UserRole
 import java.time.LocalDateTime
 
 /**
@@ -32,6 +33,8 @@ class UserRepositoryImpl(
             .map { toDomain(it) }
             .orElse(null)
 
+    override fun existsByRole(role: UserRole): Boolean = jpaRepository.existsByRole(role.code)
+
     @Transactional
     override fun delete(id: String) {
         jpaRepository.softDeleteById(id, LocalDateTime.now())
@@ -43,6 +46,7 @@ class UserRepositoryImpl(
             email = user.email,
             passwordHash = user.passwordHash,
             nickname = user.nickname,
+            role = user.role.code,
             createdAt = user.createdAt,
             updatedAt = user.updatedAt,
         )
@@ -53,6 +57,7 @@ class UserRepositoryImpl(
             email = entity.email,
             passwordHash = entity.passwordHash,
             nickname = entity.nickname,
+            role = UserRole.fromCode(entity.role),
             createdAt = entity.createdAt,
             updatedAt = entity.updatedAt,
         )

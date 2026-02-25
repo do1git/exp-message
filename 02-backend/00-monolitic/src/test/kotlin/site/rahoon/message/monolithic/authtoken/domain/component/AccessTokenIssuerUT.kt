@@ -41,7 +41,7 @@ class AccessTokenIssuerUT {
         val sessionId = "session123"
 
         // when
-        val result = accessTokenIssuer.issue(userId, sessionId)
+        val result = accessTokenIssuer.issue(userId, sessionId, "USER")
 
         // then
         result.shouldNotBeNull()
@@ -81,7 +81,7 @@ class AccessTokenIssuerUT {
         val beforeIssue = Instant.now()
 
         // when
-        val result = accessTokenIssuer.issue(userId, sessionId)
+        val result = accessTokenIssuer.issue(userId, sessionId, "USER")
         val afterIssue = Instant.now()
 
         // then
@@ -110,8 +110,8 @@ class AccessTokenIssuerUT {
         val sessionId2 = "session456"
 
         // when
-        val token1 = accessTokenIssuer.issue(userId1, sessionId1)
-        val token2 = accessTokenIssuer.issue(userId2, sessionId2)
+        val token1 = accessTokenIssuer.issue(userId1, sessionId1, "USER")
+        val token2 = accessTokenIssuer.issue(userId2, sessionId2, "USER")
 
         // then
         Assertions.assertNotEquals(token1.token, token2.token)
@@ -126,8 +126,8 @@ class AccessTokenIssuerUT {
         val sessionId = "session123"
 
         // when
-        val token1 = accessTokenIssuer.issue(userId, sessionId)
-        val token2 = accessTokenIssuer.issue(userId, sessionId)
+        val token1 = accessTokenIssuer.issue(userId, sessionId, "USER")
+        val token2 = accessTokenIssuer.issue(userId, sessionId, "USER")
 
         // then
         // JTI가 다르므로 토큰 문자열도 달라야 함

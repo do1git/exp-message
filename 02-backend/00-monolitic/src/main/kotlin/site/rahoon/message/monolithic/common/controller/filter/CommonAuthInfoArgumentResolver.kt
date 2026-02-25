@@ -9,7 +9,9 @@ import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 import site.rahoon.message.monolithic.common.auth.AuthTokenResolver
+import site.rahoon.message.monolithic.common.auth.CommonAdminAuthInfo
 import site.rahoon.message.monolithic.common.auth.CommonAuthInfo
+import site.rahoon.message.monolithic.common.auth.CommonAuthRole
 import site.rahoon.message.monolithic.common.domain.CommonError
 import site.rahoon.message.monolithic.common.domain.DomainException
 import site.rahoon.message.monolithic.common.observation.MdcKeys
@@ -25,22 +27,11 @@ class CommonAuthInfoArgumentResolver(
     private val authTokenResolver: AuthTokenResolver,
 ) : HandlerMethodArgumentResolver {
     override fun supportsParameter(parameter: MethodParameter): Boolean {
-        // AuthInfo 타입의 파라미터인지 확인
-        val isAuthInfoType =
-            parameter.parameterType == CommonAuthInfo::class.java ||
-                parameter.parameterType == CommonAuthInfo::class.javaObjectType
-
-        if (!isAuthInfoType) {
-            return false
-        }
-
-//        // @AuthInfoAffect 어노테이션이 있는 경우에만 처리
-//        // 메소드 레벨 또는 클래스 레벨 어노테이션 확인
-//        val methodAnnotation = parameter.getMethodAnnotation(AuthInfoAffect::class.java)
-//        val classAnnotation = parameter.containingClass.getAnnotation(AuthInfoAffect::class.java)
-//
-//        return methodAnnotation != null || classAnnotation != null
-        return true
+        val type = parameter.parameterType
+        return type == CommonAuthInfo::class.java ||
+            type == CommonAuthInfo::class.javaObjectType ||
+            type == CommonAdminAuthInfo::class.java ||
+            type == CommonAdminAuthInfo::class.javaObjectType
     }
 
     @Suppress("ThrowsCount", "ReturnCount")
@@ -79,13 +70,33 @@ class CommonAuthInfoArgumentResolver(
         }
 
         try {
-            // 토큰 검증 및 AuthInfo 반환
             val authInfo = authTokenResolver.verify(authHeader)
             authInfo?.let {
                 MDC.put(MdcKeys.USER_ID, it.userId)
                 MDC.put(MdcKeys.AUTH_SESSION_ID, it.sessionId)
             }
-            return authInfo
+
+            val isAdminAuthInfo =
+                parameter.parameterType == CommonAdminAuthInfo::class.java ||
+                    parameter.parameterType == CommonAdminAuthInfo::class.javaObjectType
+
+            return if (isAdminAuthInfo) {
+                if (authInfo == null) {
+                    throw DomainException(
+                        error = CommonError.UNAUTHORIZED,
+                        details = mapOf("reason" to "Authorization required"),
+                    )
+                }
+                if (authInfo.role != CommonAuthRole.ADMIN) {
+                    throw DomainException(
+                        error = CommonError.FORBIDDEN,
+                        details = mapOf("reason" to "Admin role required"),
+                    )
+                }
+                CommonAdminAuthInfo(authInfo)
+            } else {
+                authInfo
+            }
         } catch (e: DomainException) {
             // 토큰 검증 실패
             if (required) {

@@ -23,10 +23,12 @@ class UserEntity(
     var passwordHash: String,
     @Column(name = "nickname", nullable = false, length = 100)
     var nickname: String,
+    @Column(name = "role", nullable = false, length = 20)
+    var role: String,
     @Column(name = "created_at", nullable = false)
     var createdAt: LocalDateTime,
     @Column(name = "updated_at", nullable = false)
     var updatedAt: LocalDateTime,
 ) : JpaEntityBase() {
-    constructor() : this("", "", "", "", LocalDateTime.now(), LocalDateTime.now())
+    constructor() : this("", "", "", "", "USER", LocalDateTime.now(), LocalDateTime.now())
 }

@@ -11,6 +11,7 @@ import org.springframework.messaging.simp.stomp.StompCommand
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor
 import org.springframework.messaging.support.MessageBuilder
 import site.rahoon.message.monolithic.common.auth.CommonAuthInfo
+import site.rahoon.message.monolithic.common.auth.CommonAuthRole
 import site.rahoon.message.monolithic.common.domain.CommonError
 import site.rahoon.message.monolithic.common.domain.DomainException
 import site.rahoon.message.monolithic.common.websocket.config.auth.WebSocketAuthHandshakeHandler
@@ -31,7 +32,7 @@ class WebSocketSessionExpiryInterceptorUT {
 
     @Test
     fun `CONNECT면 만료 검사 없이 통과`() {
-        val expiredAuthInfo = CommonAuthInfo("u1", "s1", LocalDateTime.now().minusSeconds(1))
+        val expiredAuthInfo = CommonAuthInfo("u1", "s1", LocalDateTime.now().minusSeconds(1), CommonAuthRole.USER)
         val message = messageWithSessionAuth(StompCommand.CONNECT, expiredAuthInfo)
 
         val result = interceptor.preSend(message, mockChannel)
@@ -50,7 +51,7 @@ class WebSocketSessionExpiryInterceptorUT {
 
     @Test
     fun `expiresAt이 미래면 통과`() {
-        val futureAuthInfo = CommonAuthInfo("u1", "s1", LocalDateTime.now().plusHours(1))
+        val futureAuthInfo = CommonAuthInfo("u1", "s1", LocalDateTime.now().plusHours(1), CommonAuthRole.USER)
         val message = messageWithSessionAuth(StompCommand.SUBSCRIBE, futureAuthInfo)
 
         val result = interceptor.preSend(message, mockChannel)
@@ -60,7 +61,7 @@ class WebSocketSessionExpiryInterceptorUT {
 
     @Test
     fun `expiresAt이 과거면 DomainException UNAUTHORIZED 발생`() {
-        val expiredAuthInfo = CommonAuthInfo("u1", "s1", LocalDateTime.now().minusSeconds(1))
+        val expiredAuthInfo = CommonAuthInfo("u1", "s1", LocalDateTime.now().minusSeconds(1), CommonAuthRole.USER)
         val message = messageWithSessionAuth(StompCommand.SUBSCRIBE, expiredAuthInfo)
 
         val ex = shouldThrow<DomainException> {
@@ -75,7 +76,7 @@ class WebSocketSessionExpiryInterceptorUT {
 
     @Test
     fun `SEND 시 만료면 DomainException 발생`() {
-        val expiredAuthInfo = CommonAuthInfo("u1", "s1", LocalDateTime.now().minusMinutes(1))
+        val expiredAuthInfo = CommonAuthInfo("u1", "s1", LocalDateTime.now().minusMinutes(1), CommonAuthRole.USER)
         val message = messageWithSessionAuth(StompCommand.SEND, expiredAuthInfo)
 
         shouldThrow<DomainException> {

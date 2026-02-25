@@ -8,6 +8,7 @@ data class User(
     val email: String,
     val passwordHash: String,
     val nickname: String,
+    val role: UserRole,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
 ) {
@@ -19,6 +20,7 @@ data class User(
             email: String,
             passwordHash: String,
             nickname: String,
+            role: UserRole = UserRole.USER,
         ): User {
             val now = LocalDateTime.now()
             return User(
@@ -26,6 +28,7 @@ data class User(
                 email = email,
                 passwordHash = passwordHash,
                 nickname = nickname,
+                role = role,
                 createdAt = now,
                 updatedAt = now,
             )
@@ -38,6 +41,24 @@ data class User(
     fun updateNickname(newNickname: String): User =
         this.copy(
             nickname = newNickname,
+            updatedAt = LocalDateTime.now(),
+        )
+
+    /**
+     * 비밀번호를 업데이트합니다.
+     */
+    fun updatePassword(newPasswordHash: String): User =
+        this.copy(
+            passwordHash = newPasswordHash,
+            updatedAt = LocalDateTime.now(),
+        )
+
+    /**
+     * 역할을 업데이트합니다.
+     */
+    fun updateRole(newRole: UserRole): User =
+        this.copy(
+            role = newRole,
             updatedAt = LocalDateTime.now(),
         )
 }

@@ -73,6 +73,15 @@ services:
       dockerfile: Dockerfile
     container_name: compose-00-monolitic-db-migrations
     restart: "no"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        for i in 1 2 3 4 5; do
+          java -jar app.jar && exit 0
+          echo "Migration failed (attempt $$i/5), retry in 5s..."
+          sleep 5
+        done
+        exit 1
     environment:
       DB_HOST: mysql
       DB_PORT: 3306

@@ -52,6 +52,7 @@ class AccessTokenVerifier(
             val sessionId =
                 claims.get("sid", String::class.java)
                     ?: throw DomainException(AuthTokenError.INVALID_TOKEN)
+            val role = claims.get("role", String::class.java) ?: "USER"
 
             val expiresAt =
                 claims.expiration?.toInstant()
@@ -66,6 +67,7 @@ class AccessTokenVerifier(
                 // 밀리초 제거
                 userId = userId,
                 sessionId = sessionId,
+                role = role,
             )
         } catch (e: ExpiredJwtException) {
             throw DomainException(AuthTokenError.TOKEN_EXPIRED, details = mapOf("token" to cleanToken), cause = e)

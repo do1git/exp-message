@@ -106,4 +106,68 @@ class UserDomainService(
                 )
         return UserInfo.Detail.from(user)
     }
+
+    /**
+     * 이메일로 사용자를 조회합니다. (없으면 null)
+     */
+    fun findUserByEmail(email: String): User? = userRepository.findByEmail(email)
+
+    /**
+     * 해당 역할의 사용자가 존재하는지 확인합니다.
+     */
+    fun existsByRole(role: UserRole): Boolean = userRepository.existsByRole(role)
+
+    @Transactional
+    fun createAdmin(
+        email: String,
+        passwordHash: String,
+        nickname: String,
+    ): User {
+        userRepository.findByEmail(email)?.let {
+            throw DomainException(
+                error = UserError.EMAIL_ALREADY_EXISTS,
+                details = mapOf("email" to email),
+            )
+        }
+        val user =
+            User.create(
+                email = email,
+                passwordHash = passwordHash,
+                nickname = nickname,
+                role = UserRole.ADMIN,
+            )
+        return userRepository.save(user)
+    }
+
+    @Transactional
+    fun updatePasswordAndRole(
+        userId: String,
+        passwordHash: String,
+        role: UserRole,
+    ) {
+        val user =
+            userRepository.findById(userId)
+                ?: throw DomainException(
+                    error = UserError.USER_NOT_FOUND,
+                    details = mapOf("userId" to userId),
+                )
+        val updatedUser = user.updatePassword(passwordHash).updateRole(role)
+        userRepository.save(updatedUser)
+    }
+
+    @Transactional
+    fun updateRole(
+        userId: String,
+        role: UserRole,
+    ): UserInfo.Detail {
+        val user =
+            userRepository.findById(userId)
+                ?: throw DomainException(
+                    error = UserError.USER_NOT_FOUND,
+                    details = mapOf("userId" to userId),
+                )
+        val updatedUser = user.updateRole(role)
+        val savedUser = userRepository.save(updatedUser)
+        return UserInfo.Detail.from(savedUser)
+    }
 }

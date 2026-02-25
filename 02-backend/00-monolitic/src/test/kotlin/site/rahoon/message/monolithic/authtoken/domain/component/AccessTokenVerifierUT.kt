@@ -43,7 +43,7 @@ class AccessTokenVerifierUT {
         // given
         val userId = "user123"
         val sessionId = "session123"
-        val issuedToken = accessTokenIssuer.issue(userId, sessionId)
+        val issuedToken = accessTokenIssuer.issue(userId, sessionId, "USER")
 
         // when
         val result = accessTokenVerifier.verify(issuedToken.token)
@@ -61,7 +61,7 @@ class AccessTokenVerifierUT {
         // given
         val userId = "user123"
         val sessionId = "session123"
-        val issuedToken = accessTokenIssuer.issue(userId, sessionId)
+        val issuedToken = accessTokenIssuer.issue(userId, sessionId, "USER")
         val tokenWithBearer = "Bearer ${issuedToken.token}"
 
         // when
@@ -79,7 +79,7 @@ class AccessTokenVerifierUT {
         // given
         val userId = "user123"
         val sessionId = "session123"
-        val issuedToken = accessTokenIssuer.issue(userId, sessionId)
+        val issuedToken = accessTokenIssuer.issue(userId, sessionId, "USER")
         val tokenWithBearer = "bearer ${issuedToken.token}"
 
         // when
@@ -244,6 +244,7 @@ class AccessTokenVerifierUT {
             .claim("typ", "access")
             .claim("uid", userId)
             .claim("sid", sessionId)
+            .claim("role", "USER")
             .signWith(secretKey)
             .compact()
 }
