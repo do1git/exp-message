@@ -37,6 +37,15 @@ database:
   formatSql: true
   useSqlComments: true
 
+# Default Admin Configuration (startup 시 생성/업데이트)
+# method: default(없을 때만 생성) | create-update(없으면 생성, 있으면 비밀번호 재설정)
+# password 비어 있으면 랜덤 생성 후 로그 출력
+defaultAdmin:
+  email: admin@example.com
+  password: ""  # Empty = random generated
+  nickname: admin
+  method: default
+
 # Redis Configuration
 redis:
   host: ""  # Empty to use auto-generated name: Release.Name-redis

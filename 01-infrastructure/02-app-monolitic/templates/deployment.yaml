@@ -75,6 +75,14 @@ spec:
           value: {{ .Values.redis.port | quote }}
         - name: REDIS_PASSWORD
           value: {{ .Values.redis.password | quote }}
+        - name: DEFAULT_ADMIN_EMAIL
+          value: {{ .Values.defaultAdmin.email | default "admin@example.com" | quote }}
+        - name: DEFAULT_ADMIN_PASSWORD
+          value: {{ .Values.defaultAdmin.password | default "" | quote }}
+        - name: DEFAULT_ADMIN_NICKNAME
+          value: {{ .Values.defaultAdmin.nickname | default "admin" | quote }}
+        - name: DEFAULT_ADMIN_METHOD
+          value: {{ .Values.defaultAdmin.method | default "default" | quote }}
         {{- if .Values.javaOpts }}
         - name: JAVA_OPTS
           value: {{ .Values.javaOpts | quote }}

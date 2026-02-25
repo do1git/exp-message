@@ -100,6 +100,12 @@ app-monolitic:
     host: ""                    # Empty to use auto-generated name: Release.Name-redis
     port: 6379                  # Common: 6379
     password: redispassword     # Common: redispassword
+  # Default Admin (startup 시 생성/업데이트. method: default | create-update)
+  defaultAdmin:
+    email: admin@example.com
+    password: ""                # Empty = random generated
+    nickname: admin
+    method: default
 
 # ============================================================================
 # Web Landing Configuration (for Helm chart)
