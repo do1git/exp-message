@@ -6,11 +6,12 @@
 param(
     [Parameter(Position=0)]
     [string]$Action,
-    
+
     [Parameter(Position=1)]
     [string]$Service,
-    
-    [switch]$Help
+
+    [switch]$Help,
+    [switch]$Build
 )
 
 $ErrorActionPreference = "Stop"
@@ -38,28 +39,36 @@ function Test-EnvFile {
 
 # Up (start services)
 function Invoke-Up {
+    param([bool]$ForceBuild = $false)
+
     Write-Info "=========================================="
     Write-Info "Docker Compose Up Started"
     Write-Info "=========================================="
-    
+
     if (-not (Test-EnvFile)) {
         exit 1
     }
-    
+
     Write-Info "Compose directory: $ComposeDir"
     Write-Info "Environment file: $EnvFile"
-    
+
     Push-Location $ComposeDir
     try {
+        if ($ForceBuild) {
+            Write-Info "Force rebuilding images (--no-cache)..."
+            docker-compose --env-file $EnvFile build --no-cache
+            if ($LASTEXITCODE -ne 0) { throw "docker-compose build failed" }
+        }
+
         docker-compose --env-file $EnvFile up -d
         if ($LASTEXITCODE -ne 0) { throw "docker-compose up failed" }
-        
+
         Write-Info "Checking service status..."
         docker-compose --env-file $EnvFile ps
     } finally {
         Pop-Location
     }
-    
+
     Write-Success "=========================================="
     Write-Success "Docker Compose Up Completed!"
     Write-Success "=========================================="
@@ -163,6 +172,7 @@ Usage: .\docker-compose.ps1 [action] [service]
 
 Options:
   -Help            Show this help message
+  -Build           Force rebuild images (--no-cache) before up
 
 Actions:
   up               Start all services [default]
@@ -174,6 +184,7 @@ Actions:
 Examples:
   .\docker-compose.ps1        # Start all services (default)
   .\docker-compose.ps1 up     # Start all services
+  .\docker-compose.ps1 up -Build  # Force rebuild and start
   .\docker-compose.ps1 down   # Stop all services
   .\docker-compose.ps1 ps    # Show status
   .\docker-compose.ps1 logs  # Show all logs
@@ -195,7 +206,7 @@ if (-not $Action) {
 }
 
 switch ($Action) {
-    "up" { Invoke-Up }
+    "up" { Invoke-Up -ForceBuild:$Build }
     "down" { Invoke-Down }
     "ps" { Invoke-Status }
     "logs" { Invoke-Logs -ServiceName $Service }
