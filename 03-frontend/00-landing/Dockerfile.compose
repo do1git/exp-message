@@ -1,0 +1,15 @@
+FROM node:20-alpine AS widget-builder
+WORKDIR /app/01-widget
+
+COPY 01-widget/package.json ./
+RUN npm install --no-audit --no-fund
+
+COPY 01-widget ./
+RUN npm run build:bundle
+
+FROM nginx:alpine
+
+COPY 00-landing/index.html 00-landing/styles.css /usr/share/nginx/html/
+COPY --from=widget-builder /app/01-widget/dist/widget.iife.js /usr/share/nginx/html/widget.iife.js
+
+EXPOSE 80

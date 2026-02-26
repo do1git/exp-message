@@ -104,8 +104,8 @@ services:
 
   web-landing:
     build:
-      context: ../../03-frontend/00-landing
-      dockerfile: Dockerfile
+      context: ../../03-frontend
+      dockerfile: 00-landing/Dockerfile.compose
     container_name: compose-00-monolitic-web-landing
     restart: unless-stopped
     deploy:

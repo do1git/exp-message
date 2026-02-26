@@ -12,7 +12,10 @@ npm install
 npm run build
 ```
 
-Output: `dist/widget.iife.js` (single file containing all code and styles)
+Output:
+- `dist/widget.iife.js` (single file containing all code and styles)
+- `../02-widget-example/widget.iife.js` (copied automatically)
+- `../00-landing/widget.iife.js` (copied automatically)
 
 ## How to Use
 

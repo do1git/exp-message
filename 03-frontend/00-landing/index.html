@@ -46,5 +46,25 @@
   <footer>
     <p>r-message — 고객과 더욱 친해지기 위한 메신저</p>
   </footer>
+
+  <script src="/widget.iife.js"></script>
+  <script>
+    (function initChatWidget() {
+      if (!window.ChatWidget) {
+        console.error("[widget] ChatWidget not found. Build widget first.");
+        return;
+      }
+
+      var protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      var host = window.location.host;
+
+      window.ChatWidget.init({
+        apiUrl: window.location.origin + "/api",
+        wsUrl: protocol + "//" + host + "/api/ws",
+        channelId: "landing-default",
+        theme: "light"
+      });
+    })();
+  </script>
 </body>
 </html>

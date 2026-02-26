@@ -5,7 +5,8 @@
   "description": "Embeddable chat widget for exp-message",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && cp dist/widget.iife.js ../02-widget-example/widget.iife.js",
+    "build:bundle": "tsc && vite build",
+    "build": "npm run build:bundle && cp dist/widget.iife.js ../02-widget-example/widget.iife.js && cp dist/widget.iife.js ../00-landing/widget.iife.js",
     "preview": "vite preview"
   },
   "dependencies": {
