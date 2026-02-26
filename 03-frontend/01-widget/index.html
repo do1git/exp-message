@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Widget Development</title>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+      .container {
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+      }
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+      }
+      .info-box {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      .info-box h2 {
+        margin-top: 0;
+        color: #333;
+        font-size: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🛠️ Widget Development Environment</h1>
+      <p class="subtitle">Development testing page with hot reload</p>
+
+      <div class="info-box">
+        <h2>Development Mode</h2>
+        <p>This page is for widget development with Vite hot reload.</p>
+        <p>
+          The widget will automatically reload when you modify source files.
+        </p>
+      </div>
+
+      <div class="info-box">
+        <h2>Testing</h2>
+        <p>The chat widget should appear in the bottom-right corner.</p>
+        <p>Open browser console to see logs.</p>
+      </div>
+    </div>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
