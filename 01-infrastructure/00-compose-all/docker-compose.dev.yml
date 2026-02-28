@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: compose-00-monolitic-mysql-dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-monolitic_db}
+      MYSQL_USER: ${DB_USERNAME:-monolitic_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-monolitic_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./.data/mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    networks:
+      - compose-monolitic-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: compose-00-monolitic-redis-dev
+    restart: unless-stopped
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    command: >
+      sh -c "
+      if [ -n \"$$REDIS_PASSWORD\" ]; then
+        redis-server --requirepass \"$$REDIS_PASSWORD\"
+      else
+        redis-server
+      fi
+      "
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./.data/redis:/data
+    healthcheck:
+      test: >
+        sh -c "
+        if [ -n \"$$REDIS_PASSWORD\" ]; then
+          redis-cli -a \"$$REDIS_PASSWORD\" ping
+        else
+          redis-cli ping
+        fi
+        "
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    networks:
+      - compose-monolitic-network
+
+  db-migrations:
+    build:
+      context: ../../02-backend/01-db-migrations
+      dockerfile: Dockerfile
+    container_name: compose-00-monolitic-db-migrations-dev
+    restart: "no"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        for i in 1 2 3 4 5; do
+          java -jar app.jar && exit 0
+          echo "Migration failed (attempt $$i/5), retry in 5s..."
+          sleep 5
+        done
+        exit 1
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-monolitic_db}
+      DB_USERNAME: ${DB_USERNAME:-monolitic_user}
+      DB_PASSWORD: ${DB_PASSWORD:-monolitic_password}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+        reservations:
+          cpus: '0.05'
+          memory: 32M
+    networks:
+      - compose-monolitic-network
+
+networks:
+  compose-monolitic-network:
+    driver: bridge

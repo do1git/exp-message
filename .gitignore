@@ -4,3 +4,4 @@ node_modules/
 # Lock files (root: husky only)
 package-lock.json
 pnpm-lock.yaml
+.idea/
