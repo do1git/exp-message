@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Widget Example</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .info-box {
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .info-box h2 {
+      margin-top: 0;
+      color: #333;
+      font-size: 18px;
+    }
+    code {
+      background: #e9ecef;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 14px;
+      color: #d63384;
+    }
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 15px 0;
+    }
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+    .feature-list {
+      list-style: none;
+      padding: 0;
+    }
+    .feature-list li {
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .feature-list li:last-child {
+      border-bottom: none;
+    }
+    .feature-list li::before {
+      content: "✓";
+      color: #667eea;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Chat Widget Integration Example</h1>
+    <p class="subtitle">This page demonstrates how to embed the chat widget using two simple scripts</p>
+
+    <div class="info-box">
+      <h2>📦 How to Integrate</h2>
+      <p>Add these two scripts to your HTML page (similar to Google Analytics):</p>
+      <pre><code>&lt;!-- 1. Load widget script --&gt;
+&lt;script src="./widget.iife.js"&gt;&lt;/script&gt;
+
+&lt;!-- 2. Initialize with config --&gt;
+&lt;script&gt;
+  ChatWidget.init({
+    apiUrl: 'http://localhost:8080/api',
+    wsUrl: 'ws://localhost:8080/ws',
+    channelId: 'demo-channel',
+    theme: 'light'
+  });
+&lt;/script&gt;</code></pre>
+    </div>
+
+    <div class="info-box">
+      <h2>✨ Features</h2>
+      <ul class="feature-list">
+        <li>Shadow DOM for style isolation</li>
+        <li>Zero dependencies on host page</li>
+        <li>Customizable configuration</li>
+        <li>Responsive design</li>
+        <li>Easy integration like Google Analytics</li>
+      </ul>
+    </div>
+
+    <div class="info-box">
+      <h2>🎯 Current Status</h2>
+      <p>The chat widget should appear in the bottom-right corner of this page.</p>
+      <p>Click the button to open/close the chat window.</p>
+    </div>
+  </div>
+
+  <!-- Widget Integration (GA-style) -->
+  <!-- 1. Load widget script -->
+  <script src="./widget.iife.js"></script>
+  
+  <!-- 2. Initialize with config -->
+  <script>
+    // Wait for widget to load
+    if (window.ChatWidget) {
+      ChatWidget.init({
+        apiUrl: 'http://localhost:8080/api',
+        wsUrl: 'ws://localhost:8080/ws',
+        channelId: 'demo-channel',
+        theme: 'light'
+      });
+      console.log('✅ Chat widget initialized');
+    } else {
+      console.error('❌ ChatWidget not found. Make sure to build the widget first.');
+    }
+  </script>
+</body>
+</html>

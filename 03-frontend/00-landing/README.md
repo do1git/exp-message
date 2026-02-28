@@ -16,6 +16,14 @@ npx serve .
 
 이후 `http://localhost:8080` 접속
 
+## 위젯 연동
+
+`/widget.iife.js`를 로드해 채팅 위젯을 초기화합니다.
+파일은 `03-frontend/01-widget`에서 `npm run build`를 실행하면 자동으로 복사됩니다.
+
+`01-infrastructure/00-compose-all` 경로에서 `docker compose up --build`를 실행하는 경우에는
+`00-landing/Dockerfile.compose`가 `01-widget`를 함께 빌드하므로 별도 수동 빌드가 필요 없습니다.
+
 ## Docker로 호스팅
 
 ```bash

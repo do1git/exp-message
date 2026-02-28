@@ -1,0 +1,16 @@
+{
+  "name": "@exp-message/frontend",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "01-widget"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=01-widget",
+    "build": "npm run build --workspace=01-widget",
+    "preview": "npm run preview --workspace=01-widget"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
