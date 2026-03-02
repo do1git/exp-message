@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Send } from 'lucide-react';
 import type { WidgetConfig } from '../types/config';
 
 interface ChatWindowProps {
@@ -35,7 +36,7 @@ export default function ChatWindow({ config }: ChatWindowProps) {
             <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
                 <div className="mb-4">
                     <div className="bg-white p-3 rounded-lg shadow-sm max-w-[80%]">
-                        <p className="text-sm text-gray-800">Hello! How can we help you today?</p>
+                        <p className="text-sm text-gray-800">Hello! To continue to start a conversation, please let us know your email.</p>
                         <span className="text-xs text-gray-400 mt-1 block">Just now</span>
                     </div>
                 </div>
@@ -43,7 +44,8 @@ export default function ChatWindow({ config }: ChatWindowProps) {
 
             {/* Input */}
             <div className="p-4 bg-white border-t border-gray-200">
-                <div className="flex gap-2">
+                <div className=' bg-amber-300'>Authorized</div>
+                <div className="flex gap-2 mt-2">
                     <input
                         type="text"
                         value={message}
@@ -54,12 +56,10 @@ export default function ChatWindow({ config }: ChatWindowProps) {
                     />
                     <button
                         onClick={handleSend}
-                        className="w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-colors"
+                        className="w-10 h-10 bg-blue-600  hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-colors"
                         aria-label="Send message"
                     >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                        </svg>
+                        <Send className="w-5 h-5 mr-0.5 mt-0.5" />
                     </button>
                 </div>
             </div>

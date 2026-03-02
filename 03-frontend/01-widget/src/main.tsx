@@ -68,9 +68,9 @@ window.ChatWidget = {
 // Auto-initialize for development
 if (import.meta.env.DEV) {
     window.ChatWidget.init({
-        apiUrl: 'http://localhost:8080/api',
+        apiUrl: 'http://localhost:8080',
         wsUrl: 'ws://localhost:8080/ws',
-        channelId: 'dev-channel',
+        channelId: '61f65601-6fae-4c8e-908b-bde692824fc2',
         theme: 'light'
     });
 }
