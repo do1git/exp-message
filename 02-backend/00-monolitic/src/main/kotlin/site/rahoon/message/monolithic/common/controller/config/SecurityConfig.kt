@@ -16,6 +16,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @Configuration
 @EnableWebSecurity
 class SecurityConfig {
+    companion object {
+        private const val CORS_MAX_AGE_SECONDS = 3600L
+    }
+
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
@@ -39,7 +43,7 @@ class SecurityConfig {
             allowedHeaders = listOf("*")
             exposedHeaders = listOf("Authorization")
             allowCredentials = false
-            maxAge = 3600
+            maxAge = CORS_MAX_AGE_SECONDS
         }
 
         return UrlBasedCorsConfigurationSource().apply {
