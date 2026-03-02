@@ -37,7 +37,7 @@ class SecurityConfig {
             allowedOriginPatterns = listOf(
                 "http://localhost:*",
                 "http://127.0.0.1:*",
-                "https://message.rahoon.site"
+                "https://message.rahoon.site",
             )
             allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
             allowedHeaders = listOf("*")
